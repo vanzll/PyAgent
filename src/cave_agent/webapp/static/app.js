@@ -1,7 +1,6 @@
 const sessionStorageKey = "pyagent-active-session";
 
 const form = document.getElementById("chat-form");
-const tickersInput = document.getElementById("tickers");
 const promptInput = document.getElementById("prompt");
 const submitButton = document.getElementById("submit-button");
 const newSessionButton = document.getElementById("new-session-button");
@@ -91,7 +90,7 @@ function renderMessages(messages) {
     const node = document.createElement("article");
     node.className = `chat-message ${message.role}`;
     const runMeta = message.run_id ? `<span class="message-run">Run ${message.run_id}</span>` : "";
-    const focus = message.tickers && message.tickers.length ? message.tickers.join(", ") : "Session context";
+    const focus = message.tickers && message.tickers.length ? message.tickers.join(", ") : "General market context";
     node.innerHTML = `
       <div class="message-meta">
         <span class="message-role">${message.role === "assistant" ? "Agent" : "You"}</span>
@@ -209,9 +208,6 @@ function renderSession(payload) {
   if (sessionFocusLabel) {
     sessionFocusLabel.textContent = payload.tickers.length ? payload.tickers.join(", ") : "No tickers yet";
   }
-  if (tickersInput && payload.tickers.length) {
-    tickersInput.value = payload.tickers.join(", ");
-  }
   renderMessages(payload.messages || []);
   summaryText.textContent = payload.summary_text || "No research brief yet.";
   renderSnapshotCards(payload.snapshot_cards || []);
@@ -230,7 +226,9 @@ function closeEventStream() {
 
 async function createSession(initialTickers = "") {
   const formData = new FormData();
-  formData.set("tickers", initialTickers);
+  if (initialTickers) {
+    formData.set("tickers", initialTickers);
+  }
   const response = await fetch("/api/sessions", { method: "POST", body: formData });
   if (!response.ok) {
     throw new Error("Unable to create session");
@@ -257,7 +255,7 @@ async function ensureSession() {
     }
   }
 
-  const sessionId = await createSession(tickersInput.value.trim());
+  const sessionId = await createSession("");
   await fetchSession(sessionId);
   return sessionId;
 }
@@ -352,7 +350,6 @@ function clearWorkspaceForPendingRun() {
 
 promptChips.forEach((chip) => {
   chip.addEventListener("click", () => {
-    tickersInput.value = chip.dataset.tickers || "";
     promptInput.value = chip.dataset.prompt || "";
     promptInput.focus();
   });
@@ -374,7 +371,6 @@ newSessionButton.addEventListener("click", async () => {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const prompt = promptInput.value.trim();
-  const tickers = tickersInput.value.trim();
   if (!prompt) {
     return;
   }
@@ -387,9 +383,6 @@ form.addEventListener("submit", async (event) => {
 
     const formData = new FormData();
     formData.set("prompt", prompt);
-    if (tickers) {
-      formData.set("tickers", tickers);
-    }
 
     const response = await fetch(`/api/sessions/${sessionId}/messages`, {
       method: "POST",

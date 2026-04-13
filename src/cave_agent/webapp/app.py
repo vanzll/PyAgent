@@ -38,7 +38,7 @@ def create_app(service: RunService | None = None) -> FastAPI:
     @app.post("/api/runs")
     async def create_run(
         prompt: str = Form(...),
-        tickers: str = Form(...),
+        tickers: str = Form(default=""),
         files: list[UploadFile] | None = File(default=None),
     ):
         record = await app.state.run_service.create_run(prompt, tickers, files)

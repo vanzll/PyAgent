@@ -108,18 +108,19 @@ def test_webapp_chat_session_lifecycle_and_artifact_download(tmp_path: Path) -> 
     assert "Financial Research Agent" in response.text
     assert "Ask the agent with one prompt" in response.text
     assert "Prompt" in response.text
+    assert "Tickers" not in response.text
     assert "NUS CS5260" in response.text
     assert "Alpha Vantage" in response.text
     assert "SEC EDGAR" in response.text
     assert "Results" in response.text
 
-    create_session_response = client.post("/api/sessions", data={"tickers": "AMD, NVDA"})
+    create_session_response = client.post("/api/sessions")
     assert create_session_response.status_code == 201
     session_id = create_session_response.json()["session_id"]
 
     message_response = client.post(
         f"/api/sessions/{session_id}/messages",
-        data={"prompt": "Compare valuation and recent performance", "tickers": "AMD, NVDA"},
+        data={"prompt": "Compare AMD and NVDA on valuation and recent performance"},
     )
     assert message_response.status_code == 202
     run_id = message_response.json()["run_id"]
@@ -141,9 +142,9 @@ def test_webapp_chat_session_lifecycle_and_artifact_download(tmp_path: Path) -> 
     assert result["snapshot_cards"][0]["ticker"] == "AMD"
     assert result["artifacts"][0]["name"] == "comparison.csv"
     assert result["messages"][0]["role"] == "user"
-    assert result["messages"][0]["content"] == "Compare valuation and recent performance"
+    assert result["messages"][0]["content"] == "Compare AMD and NVDA on valuation and recent performance"
     assert result["messages"][1]["role"] == "assistant"
-    assert "Compare valuation and recent performance" in result["messages"][1]["content"]
+    assert "Compare AMD and NVDA on valuation and recent performance" in result["messages"][1]["content"]
     assert result["preview_charts"][0]["url"].endswith(f"/api/runs/{run_id}/artifacts/normalized-returns.png")
 
     download_response = client.get(f"/api/runs/{run_id}/artifacts/comparison.csv")
@@ -155,10 +156,10 @@ def test_webapp_preserves_multi_turn_session_context(tmp_path: Path) -> None:
     service = RunService(storage_root=tmp_path, runner=FakeRunner())
     client = TestClient(create_app(service))
 
-    session_id = client.post("/api/sessions", data={"tickers": "AMD, NVDA"}).json()["session_id"]
+    session_id = client.post("/api/sessions").json()["session_id"]
     first_run_id = client.post(
         f"/api/sessions/{session_id}/messages",
-        data={"prompt": "Summarize AMD and NVDA", "tickers": "AMD, NVDA"},
+        data={"prompt": "Summarize AMD and NVDA"},
     ).json()["run_id"]
 
     for _ in range(50):
@@ -194,10 +195,10 @@ def test_webapp_streams_session_sse_events(tmp_path: Path) -> None:
     service = RunService(storage_root=tmp_path, runner=FakeRunner())
     client = TestClient(create_app(service))
 
-    session_id = client.post("/api/sessions", data={"tickers": "AMD, NVDA"}).json()["session_id"]
+    session_id = client.post("/api/sessions").json()["session_id"]
     client.post(
         f"/api/sessions/{session_id}/messages",
-        data={"prompt": "Summarize AMD and NVDA", "tickers": "AMD, NVDA"},
+        data={"prompt": "Summarize AMD and NVDA"},
     )
 
     with client.stream("GET", f"/api/sessions/{session_id}/events") as response:
@@ -210,3 +211,14 @@ def test_webapp_streams_session_sse_events(tmp_path: Path) -> None:
     assert 'event: userdata: {"role": "user", "content": "Summarize AMD and NVDA"}' in body
     assert 'event: artifactdata: {"name": "comparison.csv", "run_id": "' in body
     assert 'event: completeddata: {"status": "completed", "run_id": "' in body
+
+
+def test_run_service_infers_tickers_from_prompt_and_market_aliases(tmp_path: Path) -> None:
+    service = RunService(storage_root=tmp_path, runner=FakeRunner())
+
+    inferred = service.build_bundle("", [])
+    assert inferred.tickers == []
+
+    assert service.infer_tickers_from_prompt("Compare AMD and NVDA on valuation") == ["AMD", "NVDA"]
+    assert service.infer_tickers_from_prompt("Give me a quick view of Apple and Tesla") == ["AAPL", "TSLA"]
+    assert service.infer_tickers_from_prompt("What are the key risks in the current US equity market?") == ["SPY"]

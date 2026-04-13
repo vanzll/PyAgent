@@ -44,6 +44,65 @@ class RunnerProtocol(Protocol):
 
 
 class RunService:
+    COMPANY_ALIASES = {
+        "advanced micro devices": "AMD",
+        "amd": "AMD",
+        "nvidia": "NVDA",
+        "tesla": "TSLA",
+        "apple": "AAPL",
+        "microsoft": "MSFT",
+        "amazon": "AMZN",
+        "alphabet": "GOOGL",
+        "google": "GOOGL",
+        "meta": "META",
+        "facebook": "META",
+        "netflix": "NFLX",
+        "broadcom": "AVGO",
+        "palantir": "PLTR",
+        "berkshire hathaway": "BRK.B",
+        "spy": "SPY",
+        "s&p 500": "SPY",
+        "sp 500": "SPY",
+        "u.s. equity market": "SPY",
+        "us equity market": "SPY",
+        "u.s. stock market": "SPY",
+        "us stock market": "SPY",
+        "equity market": "SPY",
+        "stock market": "SPY",
+        "market snapshot": "SPY",
+    }
+    TICKER_STOP_WORDS = {
+        "A",
+        "AI",
+        "AN",
+        "AND",
+        "ARE",
+        "AS",
+        "AT",
+        "DO",
+        "ETF",
+        "FOR",
+        "GIVE",
+        "HOW",
+        "I",
+        "IN",
+        "IS",
+        "IT",
+        "ME",
+        "NOW",
+        "OF",
+        "ON",
+        "OR",
+        "SHOW",
+        "SUMMARIZE",
+        "THE",
+        "TO",
+        "US",
+        "VIEW",
+        "VS",
+        "WHAT",
+    }
+
     def __init__(self, storage_root: Path, runner: RunnerProtocol):
         self.storage_root = Path(storage_root)
         self.storage_root.mkdir(parents=True, exist_ok=True)
@@ -59,7 +118,7 @@ class RunService:
         uploads_dir.mkdir(parents=True, exist_ok=True)
         outputs_dir.mkdir(parents=True, exist_ok=True)
 
-        normalized_tickers = self._normalize_tickers(tickers)
+        normalized_tickers = self._resolve_tickers(prompt, tickers)
         record = RunRecord(run_id=run_id, prompt=prompt, workspace=workspace, tickers=normalized_tickers)
         self._runs[run_id] = record
 
@@ -90,9 +149,9 @@ class RunService:
         files: list[UploadFile] | None = None,
     ) -> RunRecord:
         session = self.get_session(session_id)
-        normalized_tickers = self._normalize_tickers(tickers) if tickers else list(session.tickers)
+        normalized_tickers = self._resolve_tickers(prompt, tickers, session.tickers)
         if not normalized_tickers:
-            raise RuntimeError("At least one ticker is required.")
+            raise RuntimeError("Could not infer a company, ETF, or market proxy from the prompt.")
 
         session.tickers = normalized_tickers
         user_message = ChatMessageRecord(role="user", content=prompt, tickers=list(normalized_tickers))
@@ -157,6 +216,28 @@ class RunService:
         bundle = self.parse_saved_files(saved_paths or []) if saved_paths else ParsedInputBundle()
         bundle.tickers = self._normalize_tickers(tickers)
         return bundle
+
+    def infer_tickers_from_prompt(self, prompt: str) -> list[str]:
+        candidates: list[tuple[int, str]] = []
+        lowered = prompt.lower()
+
+        for phrase, ticker in sorted(self.COMPANY_ALIASES.items(), key=lambda item: len(item[0]), reverse=True):
+            start = lowered.find(phrase)
+            if start >= 0:
+                candidates.append((start, ticker))
+
+        for match in re.finditer(r"\b[A-Z]{1,5}(?:\.[A-Z])?\b", prompt):
+            candidate = match.group(0).upper()
+            if candidate in self.TICKER_STOP_WORDS:
+                continue
+            candidates.append((match.start(), candidate))
+
+        candidates.sort(key=lambda item: item[0])
+        normalized = []
+        for _, ticker in candidates:
+            if ticker not in normalized:
+                normalized.append(ticker)
+        return normalized
 
     async def stream_events(self, run_id: str):
         record = self.get_run(run_id)
@@ -394,3 +475,23 @@ class RunService:
             if cleaned and cleaned not in normalized:
                 normalized.append(cleaned)
         return normalized
+
+    def _resolve_tickers(
+        self,
+        prompt: str,
+        explicit_tickers: str | list[str] | None = None,
+        fallback_tickers: list[str] | None = None,
+    ) -> list[str]:
+        if explicit_tickers:
+            normalized = self._normalize_tickers(explicit_tickers)
+            if normalized:
+                return normalized
+
+        inferred = self.infer_tickers_from_prompt(prompt)
+        if inferred:
+            return inferred
+
+        if fallback_tickers:
+            return self._normalize_tickers(fallback_tickers)
+
+        return []

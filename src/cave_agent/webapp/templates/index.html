@@ -48,16 +48,13 @@
         </div>
 
         <form id="chat-form" class="composer">
-          <label class="field-label" for="tickers">Tickers</label>
-          <input id="tickers" name="tickers" type="text" placeholder="AAPL, NVDA, SPY">
-
           <label class="field-label" for="prompt">Prompt</label>
-          <textarea id="prompt" name="prompt" rows="5" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent performance." required></textarea>
+          <textarea id="prompt" name="prompt" rows="5" placeholder="Compare AMD and Nvidia on valuation, latest fundamentals, and recent performance." required></textarea>
 
           <div class="quick-prompts">
-            <button type="button" class="prompt-chip" data-prompt="Summarize AAPL and show the recent price trend." data-tickers="AAPL">AAPL brief</button>
-            <button type="button" class="prompt-chip" data-prompt="Compare AMD and NVDA on valuation, growth, and recent performance." data-tickers="AMD, NVDA">AMD vs NVDA</button>
-            <button type="button" class="prompt-chip" data-prompt="Give me a market snapshot for SPY and highlight the main risks." data-tickers="SPY">SPY snapshot</button>
+            <button type="button" class="prompt-chip" data-prompt="Summarize Apple and show the recent price trend.">Apple brief</button>
+            <button type="button" class="prompt-chip" data-prompt="Compare AMD and Nvidia on valuation, growth, and recent performance.">AMD vs Nvidia</button>
+            <button type="button" class="prompt-chip" data-prompt="Give me a market snapshot for the US equity market and highlight the main risks.">US market snapshot</button>
           </div>
 
           <div class="composer-actions">
