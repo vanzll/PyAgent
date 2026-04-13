@@ -1,0 +1,78 @@
+from __future__ import annotations
+
+import os
+from pathlib import Path
+
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
+from .agent_runner import FinancialResearchRunner
+from .service import RunService
+
+
+def create_app(service: RunService | None = None) -> FastAPI:
+    package_dir = Path(__file__).parent
+    templates = Jinja2Templates(directory=str(package_dir / "templates"))
+    service = service or RunService(
+        storage_root=Path(os.getenv("WEBAPP_STORAGE_ROOT", ".cave-agent-webapp")),
+        runner=FinancialResearchRunner(),
+    )
+
+    app = FastAPI(title="CaveAgent Financial Research Agent")
+    app.state.run_service = service
+    app.mount("/static", StaticFiles(directory=str(package_dir / "static")), name="static")
+
+    @app.get("/", response_class=HTMLResponse)
+    async def index(request: Request):
+        demo_mode = os.getenv("WEBAPP_DEMO_MODE", "").strip().lower() in {"1", "true", "yes", "on"} or not (
+            os.getenv("ALPHAVANTAGE_API_KEY") or os.getenv("ALPHA_VANTAGE_API_KEY")
+        )
+        return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={"demo_mode": demo_mode},
+        )
+
+    @app.post("/api/runs")
+    async def create_run(
+        prompt: str = Form(...),
+        tickers: str = Form(...),
+        files: list[UploadFile] | None = File(default=None),
+    ):
+        record = await app.state.run_service.create_run(prompt, tickers, files)
+        return JSONResponse(
+            status_code=202,
+            content={
+                "run_id": record.run_id,
+                "status_url": f"/api/runs/{record.run_id}",
+                "events_url": f"/api/runs/{record.run_id}/events",
+            },
+        )
+
+    @app.get("/api/runs/{run_id}")
+    async def get_run(run_id: str):
+        try:
+            record = app.state.run_service.get_run(run_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Run not found")
+        return record.to_dict()
+
+    @app.get("/api/runs/{run_id}/events")
+    async def stream_events(run_id: str):
+        try:
+            app.state.run_service.get_run(run_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Run not found")
+        return StreamingResponse(app.state.run_service.stream_events(run_id), media_type="text/event-stream")
+
+    @app.get("/api/runs/{run_id}/artifacts/{artifact_name}")
+    async def download_artifact(run_id: str, artifact_name: str):
+        try:
+            artifact = app.state.run_service.get_artifact(run_id, artifact_name)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Artifact not found")
+        return FileResponse(path=artifact.path, media_type=artifact.content_type, filename=artifact.name)
+
+    return app

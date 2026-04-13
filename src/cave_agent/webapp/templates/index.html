@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CaveAgent Financial Research Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CaveAgent Research Desk</p>
+        <p class="topbar-title">Public Financial Research Agent</p>
+      </div>
+      <div class="topbar-tags">
+        <span class="topbar-tag">NUS CS5260 Course Project</span>
+        {% if demo_mode %}
+        <span class="topbar-tag topbar-tag-live">Demo Dataset Ready</span>
+        {% else %}
+        <span class="topbar-tag topbar-tag-live">Live Market APIs</span>
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="hero-card">
+      <div class="hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow">Public Market Intelligence</p>
+          <h1>Ask a ticker. Get a research brief.</h1>
+          <p class="lede">
+            Enter one or more U.S. stock or ETF tickers, describe the research task in plain English, and the
+            agent fetches public market data, normalizes it into a single workspace, compares evidence, and
+            returns charts, tables, and a concise brief.
+          </p>
+          {% if demo_mode %}
+          <div class="demo-banner">
+            <strong>Demo mode:</strong> stable built-in market examples are available when live API keys are not configured.
+          </div>
+          {% endif %}
+          <div class="hero-metrics">
+            <div class="metric-card">
+              <span class="metric-value">3</span>
+              <span class="metric-label">public data sources</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">SGD 0</span>
+              <span class="metric-label">in demo mode</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">SSE</span>
+              <span class="metric-label">live run streaming</span>
+            </div>
+            <div class="metric-card">
+              <span class="metric-value">CSV + PNG + MD</span>
+              <span class="metric-label">artifact outputs</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-panel hero-side-panel">
+          <p class="eyebrow">Evaluation Fit</p>
+          <h2>Built to look like a product, not a notebook.</h2>
+          <div class="hero-checklist">
+            <div class="check-item">
+              <strong>Public product shape</strong>
+              <span>One web surface for research runs, artifacts, and demo scenarios.</span>
+            </div>
+            <div class="check-item">
+              <strong>Grounded outputs</strong>
+              <span>Alpha Vantage, SEC EDGAR, and FRED are surfaced as explicit source layers.</span>
+            </div>
+            <div class="check-item">
+              <strong>Low-risk demo</strong>
+              <span>Deterministic demo mode avoids rate limits and keeps presentation cost controlled.</span>
+            </div>
+          </div>
+          <p class="course-statement">
+            This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="source-strip">
+      <article class="source-card">
+        <p class="eyebrow">Source Stack</p>
+        <h2>Alpha Vantage</h2>
+        <p>Price history, company overview, and optional news sentiment for live market runs.</p>
+      </article>
+      <article class="source-card">
+        <p class="eyebrow">Source Stack</p>
+        <h2>SEC EDGAR</h2>
+        <p>Official company filings and filing-backed facts for grounding company-level statements.</p>
+      </article>
+      <article class="source-card">
+        <p class="eyebrow">Source Stack</p>
+        <h2>FRED</h2>
+        <p>Macro time series for rate, inflation, and broader market-context questions.</p>
+      </article>
+    </section>
+
+    <section class="workspace-grid">
+      <form id="run-form" class="composer">
+        <div class="section-head">
+          <p class="eyebrow">Run The Agent</p>
+          <h2>Research Composer</h2>
+          <p class="section-copy">Use one of the guided scenarios or write your own research question.</p>
+        </div>
+
+        <label class="field-label" for="tickers">Tickers</label>
+        <input id="tickers" name="tickers" type="text" placeholder="AAPL, MSFT, NVDA" required>
+
+        <label class="field-label" for="prompt">Research Question</label>
+        <textarea id="prompt" name="prompt" rows="6" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent price performance." required></textarea>
+
+        <div class="scenario-grid">
+          <button type="button" class="scenario-card prompt-chip" data-prompt="Summarize AAPL and show the recent price trend." data-tickers="AAPL">
+            <span class="scenario-title">Single-stock brief</span>
+            <span class="scenario-copy">AAPL snapshot, recent trend, filing-backed summary.</span>
+          </button>
+          <button type="button" class="scenario-card prompt-chip" data-prompt="Compare AMD and NVDA on valuation, growth, and recent performance." data-tickers="AMD, NVDA">
+            <span class="scenario-title">Peer comparison</span>
+            <span class="scenario-copy">AMD vs NVDA on valuation, revenue scale, and relative performance.</span>
+          </button>
+          <button type="button" class="scenario-card prompt-chip" data-prompt="Give me a market snapshot for SPY and highlight the main risks." data-tickers="SPY">
+            <span class="scenario-title">ETF snapshot</span>
+            <span class="scenario-copy">Index-level market view with macro framing and key risks.</span>
+          </button>
+        </div>
+
+        <button type="submit" class="primary-btn">Run Agent</button>
+        <p class="disclaimer">For research use only. Not investment advice.</p>
+      </form>
+
+      <section class="status-card">
+        <div class="status-header">
+          <p class="eyebrow">Live Run</p>
+          <span id="status-pill" class="status-pill idle">Idle</span>
+        </div>
+        <div class="pipeline-strip">
+          <div class="pipeline-step">
+            <strong>01</strong>
+            <span>Fetch</span>
+          </div>
+          <div class="pipeline-step">
+            <strong>02</strong>
+            <span>Normalize</span>
+          </div>
+          <div class="pipeline-step">
+            <strong>03</strong>
+            <span>Compare</span>
+          </div>
+          <div class="pipeline-step">
+            <strong>04</strong>
+            <span>Deliver</span>
+          </div>
+        </div>
+        <p class="status-note">
+          Demo mode keeps the live presentation stable and holds the effective test cost at SGD 0 in demo mode.
+        </p>
+        <div id="event-log" class="event-log"></div>
+      </section>
+    </section>
+
+    <section class="results-card">
+      <div class="results-header">
+        <p class="eyebrow">Results</p>
+        <h2>Research Workbench</h2>
+      </div>
+      <article>
+        <h3>Snapshot Cards</h3>
+        <div id="snapshot-cards" class="snapshot-grid"></div>
+      </article>
+      <article>
+        <h3>Research Brief</h3>
+        <div id="summary-text" class="summary-block">No run yet.</div>
+      </article>
+      <article>
+        <h3>Comparison Tables</h3>
+        <div id="table-previews" class="preview-grid"></div>
+      </article>
+      <article>
+        <h3>Charts</h3>
+        <div id="chart-previews" class="chart-grid"></div>
+      </article>
+      <article>
+        <h3>Artifacts</h3>
+        <div id="artifacts" class="artifact-list"></div>
+      </article>
+    </section>
+
+    <footer class="site-footer">
+      <p>
+        This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+      </p>
+      <div class="footer-links">
+        <a href="https://www.alphavantage.co/documentation/" target="_blank" rel="noreferrer">Alpha Vantage</a>
+        <a href="https://www.sec.gov/search-filings/edgar-application-programming-interfaces" target="_blank" rel="noreferrer">SEC EDGAR</a>
+        <a href="https://fred.stlouisfed.org/docs/api/fred/" target="_blank" rel="noreferrer">FRED</a>
+      </div>
+    </footer>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

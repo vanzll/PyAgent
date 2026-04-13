@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: cave-agent-financial-research
+    runtime: python
+    buildCommand: "pip install '.[openai,webapp]'"
+    startCommand: "cave-agent-webapp"
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: WEBAPP_DEMO_MODE
+        value: "1"
+      - key: WEBAPP_STORAGE_ROOT
+        value: /tmp/cave-agent-webapp
+      - key: SEC_USER_AGENT
+        sync: false
+      - key: ALPHAVANTAGE_API_KEY
+        sync: false
+      - key: FRED_API_KEY
+        sync: false
+      - key: LLM_MODEL_ID
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_BASE_URL
+        sync: false
