@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import asyncio
+
 import httpx
 import pytest
 
+import cave_agent.webapp.agent_runner as agent_runner_module
 from cave_agent.webapp.financial_data import (
     AlphaVantageClient,
     DemoFinancialDataProvider,
@@ -243,3 +246,33 @@ async def test_financial_research_runner_uses_deterministic_demo_without_model(t
     assert any(artifact.name == "comparison.csv" for artifact in result.artifacts)
     assert any(card["ticker"] == "AMD" for card in result.snapshot_cards)
     assert any(chart["name"] == "normalized-returns.png" for chart in result.preview_charts)
+
+
+@pytest.mark.asyncio
+async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
+    monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")
+    monkeypatch.setenv("WEBAPP_AGENT_TIMEOUT_SECONDS", "0.01")
+    monkeypatch.setattr(FinancialResearchRunner, "_build_model", lambda self: object())
+
+    class HangingAgent:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        async def run(self, *_args, **_kwargs):
+            await asyncio.sleep(0.2)
+
+    monkeypatch.setattr(agent_runner_module, "CaveAgent", HangingAgent)
+
+    events = []
+    runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
+    result = await runner.run(
+        "Give me a market snapshot for the US equity market.",
+        ParsedInputBundle(tickers=["SPY"]),
+        tmp_path,
+        lambda event, data: events.append((event, data)),
+    )
+
+    assert "For research use only. Not investment advice." in result.summary_text
+    assert any(artifact.name == "summary.md" for artifact in result.artifacts)
+    assert any("fallback summary" in data.get("message", "") for event, data in events if event == "status")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from pathlib import Path
 from typing import Any
@@ -133,19 +134,14 @@ class FinancialResearchRunner:
             display=False,
         )
         emit("status", {"message": "Research workspace prepared"})
-        response = await agent.run(
-            f"User request: {prompt}\n"
-            f"Tickers: {', '.join(research_bundle['tickers'])}\n"
-            "The runtime already contains structured market data, SEC facts, price history, macro series, and optional news. "
-            "Inspect the data, activate relevant skills, save at least one table and one chart, then set summary_text."
+        summary_text = await self._run_agent_with_fallback(
+            agent=agent,
+            runtime=runtime,
+            prompt=prompt,
+            research_bundle=research_bundle,
+            artifact_workspace=artifact_workspace,
+            emit=emit,
         )
-
-        summary_text = await runtime.retrieve("summary_text")
-        if not summary_text:
-            summary_text = response.content
-            artifact_workspace.save_markdown(summary_text)
-        elif not any(artifact.name == "summary.md" for artifact in artifact_workspace.list_artifacts()):
-            artifact_workspace.save_markdown(summary_text)
 
         self._ensure_default_artifacts(artifact_workspace, comparison_frame, research_bundle["price_history"])
         snapshot_cards = self._build_snapshot_cards(research_bundle)
@@ -160,6 +156,40 @@ class FinancialResearchRunner:
             preview_tables=artifact_workspace.preview_tables,
             preview_charts=artifact_workspace.preview_charts,
         )
+
+    async def _run_agent_with_fallback(
+        self,
+        agent: CaveAgent,
+        runtime: IPythonRuntime,
+        prompt: str,
+        research_bundle: dict[str, Any],
+        artifact_workspace: ArtifactWorkspace,
+        emit,
+    ) -> str:
+        agent_prompt = (
+            f"User request: {prompt}\n"
+            f"Tickers: {', '.join(research_bundle['tickers'])}\n"
+            "The runtime already contains structured market data, SEC facts, price history, macro series, and optional news. "
+            "Inspect the data, activate relevant skills, save at least one table and one chart, then set summary_text."
+        )
+        timeout_seconds = float(os.getenv("WEBAPP_AGENT_TIMEOUT_SECONDS", "20"))
+        try:
+            response = await asyncio.wait_for(agent.run(agent_prompt), timeout=timeout_seconds)
+            summary_text = await runtime.retrieve("summary_text")
+            if not summary_text:
+                summary_text = response.content
+            if not any(artifact.name == "summary.md" for artifact in artifact_workspace.list_artifacts()):
+                artifact_workspace.save_markdown(summary_text)
+            return summary_text
+        except asyncio.TimeoutError:
+            emit("status", {"message": "LLM timed out, using fallback summary"})
+        except Exception as exc:
+            emit("status", {"message": f"LLM failed, using fallback summary: {exc}"})
+
+        summary_text = self._build_demo_summary(research_bundle, prompt)
+        if not any(artifact.name == "summary.md" for artifact in artifact_workspace.list_artifacts()):
+            artifact_workspace.save_markdown(summary_text)
+        return summary_text
 
     def _ensure_default_artifacts(
         self,
