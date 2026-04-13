@@ -276,3 +276,27 @@ async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_pat
     assert "For research use only. Not investment advice." in result.summary_text
     assert any(artifact.name == "summary.md" for artifact in result.artifacts)
     assert any("fallback summary" in data.get("message", "") for event, data in events if event == "status")
+
+
+def test_financial_research_runner_demo_summary_tolerates_missing_numeric_values() -> None:
+    runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
+    summary = runner._build_demo_summary(
+        {
+            "comparison_frame": __import__("pandas").DataFrame(
+                [
+                    {
+                        "ticker": "SPY",
+                        "latest_close": None,
+                        "market_cap": None,
+                        "pe_ratio": None,
+                        "latest_revenue": None,
+                    }
+                ]
+            )
+        },
+        "Give me a market snapshot.",
+    )
+
+    assert "latest close n/a" in summary
+    assert "market cap n/a" in summary
+    assert "P/E n/a" in summary

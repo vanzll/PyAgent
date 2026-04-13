@@ -269,9 +269,9 @@ class FinancialResearchRunner:
         lines = [f"Question: {prompt}", ""]
         for row in frame.itertuples(index=False):
             lines.append(
-                f"{row.ticker}: latest close {row.latest_close:.1f}, "
+                f"{row.ticker}: latest close {self._format_decimal(row.latest_close)}, "
                 f"market cap {self._format_large_number(row.market_cap)}, "
-                f"P/E {row.pe_ratio if row.pe_ratio is not None else 'n/a'}, "
+                f"P/E {self._format_decimal(row.pe_ratio)}, "
                 f"latest revenue {self._format_large_number(row.latest_revenue)}."
             )
         if len(frame) >= 2:
@@ -296,6 +296,11 @@ class FinancialResearchRunner:
         if absolute >= 1_000_000:
             return f"${value / 1_000_000:.1f}M"
         return f"${value:,.0f}"
+
+    def _format_decimal(self, value: float | None) -> str:
+        if value is None or pd.isna(value):
+            return "n/a"
+        return f"{float(value):.1f}"
 
     def _build_model(self):
         provider = os.getenv("LLM_PROVIDER", "openai").lower()
