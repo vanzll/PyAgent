@@ -161,6 +161,14 @@ The simplest path is Render:
 
 Render gives you a default `*.onrender.com` URL, which is enough for the course requirement. You do not need to buy a domain unless you want a branded URL. A full deployment walkthrough lives in [docs/render-deployment.md](docs/render-deployment.md).
 
+### Teammate Handoff Materials
+
+If another teammate needs to take over deployment, demo rehearsal, or final submission packaging, use:
+
+- [docs/teammate-handoff.md](docs/teammate-handoff.md)
+- [docs/delegation-brief.md](docs/delegation-brief.md)
+- [docs/submission-note-template.md](docs/submission-note-template.md)
+
 ### Presentation Assets
 
 Generate the 5-minute course presentation deck:
