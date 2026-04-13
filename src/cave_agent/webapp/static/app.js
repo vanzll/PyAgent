@@ -28,6 +28,10 @@ function renderEmptyState(container, message) {
 }
 
 function appendEvent(message) {
+  const newest = eventLog.firstElementChild;
+  if (newest && newest.textContent === message) {
+    return;
+  }
   const item = document.createElement("div");
   item.className = "event-item";
   item.textContent = message;

@@ -90,6 +90,47 @@ class FakeRunner:
         )
 
 
+class NaNRunner:
+    async def run(self, prompt: str, bundle: ParsedInputBundle, workspace: Path, emit) -> RunResult:
+        emit("status", {"message": "nan runner started"})
+        artifact_path = workspace / "outputs" / "summary.md"
+        artifact_path.parent.mkdir(parents=True, exist_ok=True)
+        artifact_path.write_text("ok", encoding="utf-8")
+        return RunResult(
+            summary_text="Contains missing values",
+            artifacts=[
+                ArtifactRecord(
+                    name="summary.md",
+                    path=artifact_path,
+                    content_type="text/markdown",
+                    kind="report",
+                    label="Summary",
+                )
+            ],
+            snapshot_cards=[
+                {
+                    "ticker": "SPY",
+                    "name": "SPDR S&P 500 ETF Trust",
+                    "sector": "ETF",
+                    "latest_close": 605.3,
+                    "market_cap": float("nan"),
+                    "pe_ratio": float("nan"),
+                    "latest_revenue": float("nan"),
+                    "latest_net_income": float("nan"),
+                    "recent_filing_form": "N-CSR",
+                    "description": "ETF with missing fundamentals.",
+                }
+            ],
+            preview_tables=[
+                {
+                    "name": "comparison",
+                    "columns": ["ticker", "market_cap"],
+                    "rows": [["SPY", float("nan")]],
+                }
+            ],
+        )
+
+
 def test_run_service_normalizes_tickers_without_files(tmp_path: Path) -> None:
     service = RunService(storage_root=tmp_path, runner=FakeRunner())
     bundle = service.build_bundle("amd, nvda")
@@ -222,3 +263,29 @@ def test_run_service_infers_tickers_from_prompt_and_market_aliases(tmp_path: Pat
     assert service.infer_tickers_from_prompt("Compare AMD and NVDA on valuation") == ["AMD", "NVDA"]
     assert service.infer_tickers_from_prompt("Give me a quick view of Apple and Tesla") == ["AAPL", "TSLA"]
     assert service.infer_tickers_from_prompt("What are the key risks in the current US equity market?") == ["SPY"]
+
+
+def test_webapp_session_endpoint_sanitizes_nan_values(tmp_path: Path) -> None:
+    service = RunService(storage_root=tmp_path, runner=NaNRunner())
+    client = TestClient(create_app(service))
+
+    session_id = client.post("/api/sessions").json()["session_id"]
+    run_id = client.post(
+        f"/api/sessions/{session_id}/messages",
+        data={"prompt": "Give me a market snapshot for the US equity market."},
+    ).json()["run_id"]
+
+    payload = None
+    for _ in range(50):
+        response = client.get(f"/api/sessions/{session_id}")
+        if response.status_code == 200:
+            payload = response.json()
+            if payload["status"] == "completed" and payload["run_id"] == run_id:
+                break
+        time.sleep(0.01)
+
+    assert payload is not None
+    assert payload["status"] == "completed"
+    assert payload["snapshot_cards"][0]["market_cap"] is None
+    assert payload["snapshot_cards"][0]["pe_ratio"] is None
+    assert payload["preview_tables"][0]["rows"][0][1] is None

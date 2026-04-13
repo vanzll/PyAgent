@@ -1,8 +1,27 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from math import isfinite
+from numbers import Integral, Real
 from pathlib import Path
 from typing import Any
+
+
+def _json_safe(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, Integral) and not isinstance(value, bool):
+        return int(value)
+    if isinstance(value, Real) and not isinstance(value, bool):
+        numeric = float(value)
+        if not isfinite(numeric):
+            return None
+        return numeric
+    return value
 
 
 @dataclass
@@ -82,7 +101,7 @@ class RunRecord:
                 hydrated["url"] = f"/api/runs/{self.run_id}/artifacts/{hydrated['name']}"
             preview_charts.append(hydrated)
 
-        return {
+        return _json_safe({
             "run_id": self.run_id,
             "status": self.status,
             "prompt": self.prompt,
@@ -95,7 +114,7 @@ class RunRecord:
             "preview_tables": self.preview_tables,
             "preview_charts": preview_charts,
             "error_message": self.error_message,
-        }
+        })
 
 
 @dataclass
@@ -139,7 +158,7 @@ class SessionRecord:
                 hydrated["url"] = f"/api/runs/{run_id}/artifacts/{hydrated['name']}"
             preview_charts.append(hydrated)
 
-        return {
+        return _json_safe({
             "session_id": self.session_id,
             "status": self.status,
             "tickers": self.tickers,
@@ -151,4 +170,4 @@ class SessionRecord:
             "preview_charts": preview_charts,
             "run_id": self.run_id,
             "error_message": self.error_message,
-        }
+        })
