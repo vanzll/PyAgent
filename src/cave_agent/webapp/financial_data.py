@@ -165,7 +165,11 @@ class SecEdgarClient:
         cik = f"{int(ticker_entry['cik_str']):010d}"
         async with self._client() as client:
             submissions = await self._get_json(client, f"{self.data_base_url}/submissions/CIK{cik}.json")
-            company_facts = await self._get_json(client, f"{self.data_base_url}/api/xbrl/companyfacts/CIK{cik}.json")
+            company_facts = await self._get_json(
+                client,
+                f"{self.data_base_url}/api/xbrl/companyfacts/CIK{cik}.json",
+                allow_not_found=True,
+            )
 
         return {
             "ticker": ticker,
@@ -183,8 +187,10 @@ class SecEdgarClient:
                 return item
         return None
 
-    async def _get_json(self, client: httpx.AsyncClient, url: str) -> dict[str, Any]:
+    async def _get_json(self, client: httpx.AsyncClient, url: str, allow_not_found: bool = False) -> dict[str, Any]:
         response = await client.get(url, headers={"User-Agent": self.user_agent})
+        if allow_not_found and response.status_code == 404:
+            return {}
         response.raise_for_status()
         return response.json()
 

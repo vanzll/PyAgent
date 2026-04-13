@@ -132,6 +132,43 @@ async def test_sec_client_parses_companyfacts_and_submissions() -> None:
 
 
 @pytest.mark.asyncio
+async def test_sec_client_tolerates_missing_companyfacts() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        url = str(request.url)
+        if url.endswith("/company_tickers.json"):
+            return httpx.Response(
+                200,
+                json={"0": {"ticker": "SPY", "cik_str": 884394, "title": "SPDR S&P 500 ETF TRUST"}},
+            )
+        if url.endswith("/submissions/CIK0000884394.json"):
+            return httpx.Response(
+                200,
+                json={
+                    "filings": {
+                        "recent": {
+                            "form": ["10-K"],
+                            "filingDate": ["2026-01-31"],
+                            "accessionNumber": ["0000884394-26-000001"],
+                            "primaryDocument": ["spy-20260131x10k.htm"],
+                        }
+                    }
+                },
+            )
+        if url.endswith("/api/xbrl/companyfacts/CIK0000884394.json"):
+            return httpx.Response(404, json={"detail": "Not found"})
+        raise AssertionError(f"Unexpected URL: {url}")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://data.sec.gov") as client:
+        sec = SecEdgarClient(http_client=client, user_agent="cave-agent-tests")
+        profile = await sec.fetch_company_profile("SPY")
+
+    assert profile["ticker"] == "SPY"
+    assert profile["company_name"] == "SPDR S&P 500 ETF TRUST"
+    assert profile["recent_filings"][0]["form"] == "10-K"
+    assert profile["company_facts"] == {"latest_revenue": None, "latest_net_income": None}
+
+
+@pytest.mark.asyncio
 async def test_financial_data_provider_builds_comparison_frame_without_macro_key() -> None:
     class FakeAlpha:
         async def fetch_security_snapshot(self, ticker: str):
