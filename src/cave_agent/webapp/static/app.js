@@ -36,11 +36,17 @@ function appendEvent(message) {
 }
 
 function setStatus(status) {
+  if (!statusPill) {
+    return;
+  }
   statusPill.className = `status-pill ${status}`;
   statusPill.textContent = status;
 }
 
 function setSubmitting(submitting) {
+  if (!submitButton) {
+    return;
+  }
   submitButton.disabled = submitting;
   submitButton.textContent = submitting ? "Running..." : "Send";
 }
@@ -197,9 +203,13 @@ async function fetchSession(sessionId) {
 function renderSession(payload) {
   state.sessionId = payload.session_id;
   state.currentRunId = payload.run_id || null;
-  sessionIdLabel.textContent = payload.session_id;
-  sessionFocusLabel.textContent = payload.tickers.length ? payload.tickers.join(", ") : "No tickers yet";
-  if (payload.tickers.length) {
+  if (sessionIdLabel) {
+    sessionIdLabel.textContent = payload.session_id;
+  }
+  if (sessionFocusLabel) {
+    sessionFocusLabel.textContent = payload.tickers.length ? payload.tickers.join(", ") : "No tickers yet";
+  }
+  if (tickersInput && payload.tickers.length) {
     tickersInput.value = payload.tickers.join(", ");
   }
   renderMessages(payload.messages || []);
@@ -406,11 +416,21 @@ form.addEventListener("submit", async (event) => {
   }
 });
 
-renderEmptyState(chatThread, "Start a session by asking about a ticker. The assistant will answer in chat and populate the workspace.");
-renderEmptyState(snapshotCards, "Snapshot cards will appear after the agent grounds the turn in market data.");
-renderEmptyState(tablePreviews, "Comparison tables will appear here.");
-renderEmptyState(chartPreviews, "Generated charts will appear here.");
-renderEmptyState(artifactList, "Artifacts will appear here after the agent completes a turn.");
+if (chatThread) {
+  renderEmptyState(chatThread, "Ask about a ticker to start the conversation.");
+}
+if (snapshotCards) {
+  renderEmptyState(snapshotCards, "Key metrics will appear after the agent queries market data.");
+}
+if (tablePreviews) {
+  renderEmptyState(tablePreviews, "Structured comparison tables will appear here.");
+}
+if (chartPreviews) {
+  renderEmptyState(chartPreviews, "Generated charts will appear here.");
+}
+if (artifactList) {
+  renderEmptyState(artifactList, "Downloadable outputs will appear here.");
+}
 
 ensureSession().catch((error) => {
   setStatus("failed");

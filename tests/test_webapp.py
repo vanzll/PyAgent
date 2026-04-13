@@ -106,12 +106,12 @@ def test_webapp_chat_session_lifecycle_and_artifact_download(tmp_path: Path) -> 
     response = client.get("/")
     assert response.status_code == 200
     assert "Financial Research Agent" in response.text
-    assert "Research Chat" in response.text
-    assert "Current Session" in response.text
+    assert "Ask the agent with one prompt" in response.text
+    assert "Prompt" in response.text
     assert "NUS CS5260" in response.text
     assert "Alpha Vantage" in response.text
     assert "SEC EDGAR" in response.text
-    assert "Conversation + Workspace" in response.text
+    assert "Results" in response.text
 
     create_session_response = client.post("/api/sessions", data={"tickers": "AMD, NVDA"})
     assert create_session_response.status_code == 201

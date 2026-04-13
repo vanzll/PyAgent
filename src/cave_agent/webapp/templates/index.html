@@ -10,176 +10,117 @@
   <link rel="stylesheet" href="/static/app.css">
 </head>
 <body>
-  <main class="shell">
+  <main class="shell shell-simple">
     <header class="topbar">
       <div>
-        <p class="eyebrow">CaveAgent Research Desk</p>
-        <p class="topbar-title">Public Financial Research Agent</p>
+        <p class="eyebrow">NUS CS5260 Course Project</p>
+        <p class="topbar-title">Financial Research Agent</p>
       </div>
       <div class="topbar-tags">
-        <span class="topbar-tag">NUS CS5260 Course Project</span>
         {% if demo_mode %}
-        <span class="topbar-tag topbar-tag-live">Demo Dataset Ready</span>
+        <span class="topbar-tag topbar-tag-live">Demo mode</span>
         {% else %}
         <span class="topbar-tag topbar-tag-live">Live Market APIs</span>
         {% endif %}
       </div>
     </header>
 
-    <section class="masthead">
-      <div class="masthead-copy">
-        <p class="eyebrow">Conversation + Workspace</p>
-        <h1>Financial research chat with live artifacts.</h1>
-        <p class="lede">
-          Ask about a stock or ETF in plain English. The agent replies in chat, decides when to activate finance skills,
-          and fills the workspace with charts, tables, filings-backed metrics, and downloadable reports.
-        </p>
-        {% if demo_mode %}
-        <div class="demo-banner">
-          <strong>Demo mode:</strong> built-in scenarios are active when live market or model credentials are not configured.
-        </div>
-        {% endif %}
-      </div>
-
-      <aside class="session-card">
-        <p class="eyebrow">Current Session</p>
-        <div class="session-card-row">
-          <span class="session-label">Session ID</span>
-          <strong id="session-id-label">starting…</strong>
-        </div>
-        <div class="session-card-row">
-          <span class="session-label">Focus</span>
-          <strong id="session-focus-label">No tickers yet</strong>
-        </div>
-        <div class="session-card-row">
-          <span class="session-label">Mode</span>
-          <strong>{% if demo_mode %}Demo mode{% else %}Live mode{% endif %}</strong>
-        </div>
-        <p class="course-statement">
-          This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
-        </p>
-      </aside>
+    <section class="simple-hero">
+      <p class="eyebrow">Prompt-First Workflow</p>
+      <h1>Ask the agent with one prompt.</h1>
+      <p class="lede">
+        Enter tickers and a research prompt. The assistant replies in plain English and, when needed,
+        generates charts, tables, and downloadable outputs.
+      </p>
+      <p class="course-statement">
+        This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+      </p>
     </section>
 
-    <section class="source-strip">
-      <article class="source-card">
-        <p class="eyebrow">Source Stack</p>
-        <h2>Alpha Vantage</h2>
-        <p>Price history, company overview, and optional sentiment data for market context.</p>
-      </article>
-      <article class="source-card">
-        <p class="eyebrow">Source Stack</p>
-        <h2>SEC EDGAR</h2>
-        <p>Official U.S. filings and filing-backed facts for grounded company analysis.</p>
-      </article>
-      <article class="source-card">
-        <p class="eyebrow">Source Stack</p>
-        <h2>FRED</h2>
-        <p>Macro time series for rates, inflation, and broader market framing.</p>
-      </article>
-    </section>
-
-    <section class="app-grid">
-      <section class="chat-panel">
+    <section class="simple-layout">
+      <section class="chat-panel simple-panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Research Chat</p>
-            <h2>Talk to the financial agent.</h2>
+            <p class="eyebrow">Prompt</p>
+            <h2>Ask one research question</h2>
           </div>
           <button id="new-session-button" type="button" class="secondary-btn">New Session</button>
         </div>
 
-        <div class="scenario-grid">
-          <button type="button" class="scenario-card prompt-chip" data-prompt="Summarize AAPL and show the recent price trend." data-tickers="AAPL">
-            <span class="scenario-title">Single-stock brief</span>
-            <span class="scenario-copy">AAPL overview, price trend, and filing-backed summary.</span>
-          </button>
-          <button type="button" class="scenario-card prompt-chip" data-prompt="Compare AMD and NVDA on valuation, growth, and recent performance." data-tickers="AMD, NVDA">
-            <span class="scenario-title">Peer comparison</span>
-            <span class="scenario-copy">Compare two semiconductor names in one session.</span>
-          </button>
-          <button type="button" class="scenario-card prompt-chip" data-prompt="Give me a market snapshot for SPY and highlight the main risks." data-tickers="SPY">
-            <span class="scenario-title">ETF snapshot</span>
-            <span class="scenario-copy">Use the workspace for an index-level market view.</span>
-          </button>
-        </div>
-
-        <div id="chat-thread" class="chat-thread"></div>
-
         <form id="chat-form" class="composer">
-          <label class="field-label" for="tickers">Ticker Focus</label>
+          <label class="field-label" for="tickers">Tickers</label>
           <input id="tickers" name="tickers" type="text" placeholder="AAPL, NVDA, SPY">
 
-          <label class="field-label" for="prompt">Message</label>
-          <textarea id="prompt" name="prompt" rows="4" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent performance." required></textarea>
+          <label class="field-label" for="prompt">Prompt</label>
+          <textarea id="prompt" name="prompt" rows="5" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent performance." required></textarea>
+
+          <div class="quick-prompts">
+            <button type="button" class="prompt-chip" data-prompt="Summarize AAPL and show the recent price trend." data-tickers="AAPL">AAPL brief</button>
+            <button type="button" class="prompt-chip" data-prompt="Compare AMD and NVDA on valuation, growth, and recent performance." data-tickers="AMD, NVDA">AMD vs NVDA</button>
+            <button type="button" class="prompt-chip" data-prompt="Give me a market snapshot for SPY and highlight the main risks." data-tickers="SPY">SPY snapshot</button>
+          </div>
 
           <div class="composer-actions">
             <p class="disclaimer">For research use only. Not investment advice.</p>
             <button id="submit-button" type="submit" class="primary-btn">Send</button>
           </div>
         </form>
+
+        <div class="thread-shell">
+          <div class="thread-meta">
+            <span>Session</span>
+            <strong id="session-id-label">starting…</strong>
+          </div>
+          <div id="chat-thread" class="chat-thread compact-thread"></div>
+        </div>
       </section>
 
-      <aside class="workspace-panel">
+      <aside class="workspace-panel simple-panel">
         <div class="panel-header">
           <div>
-            <p class="eyebrow">Conversation + Workspace</p>
-            <h2>Live research outputs</h2>
+            <p class="eyebrow">Results</p>
+            <h2>Answer and outputs</h2>
           </div>
           <span id="status-pill" class="status-pill idle">idle</span>
         </div>
 
-        <div class="workspace-summary">
-          <div class="metric-card">
-            <span class="metric-value">Chat</span>
-            <span class="metric-label">LLM replies stay in the thread</span>
-          </div>
-          <div class="metric-card">
-            <span class="metric-value">Artifacts</span>
-            <span class="metric-label">Tables, charts, markdown, downloads</span>
-          </div>
-        </div>
+        <section class="workspace-block">
+          <h3>Assistant Answer</h3>
+          <div id="summary-text" class="summary-block">No answer yet.</div>
+        </section>
 
-        <div class="workspace-block">
-          <h3>Live Run</h3>
+        <section class="workspace-block">
+          <h3>Live Status</h3>
           <div id="event-log" class="event-log"></div>
-        </div>
+        </section>
 
-        <div class="workspace-block">
-          <h3>Snapshot Cards</h3>
-          <div id="snapshot-cards" class="snapshot-grid"></div>
-        </div>
-
-        <div class="workspace-block">
-          <h3>Research Brief</h3>
-          <div id="summary-text" class="summary-block">No research brief yet.</div>
-        </div>
-
-        <div class="workspace-block">
-          <h3>Comparison Tables</h3>
-          <div id="table-previews" class="preview-grid"></div>
-        </div>
-
-        <div class="workspace-block">
+        <section class="workspace-block">
           <h3>Charts</h3>
           <div id="chart-previews" class="chart-grid"></div>
-        </div>
+        </section>
 
-        <div class="workspace-block">
+        <section class="workspace-block">
+          <h3>Tables</h3>
+          <div id="table-previews" class="preview-grid"></div>
+        </section>
+
+        <section class="workspace-block">
           <h3>Artifacts</h3>
           <div id="artifacts" class="artifact-list"></div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Key Metrics</h3>
+          <div id="snapshot-cards" class="snapshot-grid"></div>
+        </section>
+
+        <div class="sources-note">
+          <span>Alpha Vantage</span>
+          <span>SEC EDGAR</span>
+          <span>FRED</span>
         </div>
       </aside>
     </section>
-
-    <footer class="site-footer">
-      <p>This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.</p>
-      <div class="footer-links">
-        <a href="https://www.alphavantage.co/documentation/" target="_blank" rel="noreferrer">Alpha Vantage</a>
-        <a href="https://www.sec.gov/search-filings/edgar-application-programming-interfaces" target="_blank" rel="noreferrer">SEC EDGAR</a>
-        <a href="https://fred.stlouisfed.org/docs/api/fred/" target="_blank" rel="noreferrer">FRED</a>
-      </div>
-    </footer>
   </main>
 
   <script src="/static/app.js"></script>
