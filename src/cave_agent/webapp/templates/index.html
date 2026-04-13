@@ -26,177 +26,154 @@
       </div>
     </header>
 
-    <section class="hero-card">
-      <div class="hero-layout">
-        <div class="hero-copy">
-          <p class="eyebrow">Public Market Intelligence</p>
-          <h1>Ask a ticker. Get a research brief.</h1>
-          <p class="lede">
-            Enter one or more U.S. stock or ETF tickers, describe the research task in plain English, and the
-            agent fetches public market data, normalizes it into a single workspace, compares evidence, and
-            returns charts, tables, and a concise brief.
-          </p>
-          {% if demo_mode %}
-          <div class="demo-banner">
-            <strong>Demo mode:</strong> stable built-in market examples are available when live API keys are not configured.
-          </div>
-          {% endif %}
-          <div class="hero-metrics">
-            <div class="metric-card">
-              <span class="metric-value">3</span>
-              <span class="metric-label">public data sources</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-value">SGD 0</span>
-              <span class="metric-label">in demo mode</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-value">SSE</span>
-              <span class="metric-label">live run streaming</span>
-            </div>
-            <div class="metric-card">
-              <span class="metric-value">CSV + PNG + MD</span>
-              <span class="metric-label">artifact outputs</span>
-            </div>
-          </div>
+    <section class="masthead">
+      <div class="masthead-copy">
+        <p class="eyebrow">Conversation + Workspace</p>
+        <h1>Financial research chat with live artifacts.</h1>
+        <p class="lede">
+          Ask about a stock or ETF in plain English. The agent replies in chat, decides when to activate finance skills,
+          and fills the workspace with charts, tables, filings-backed metrics, and downloadable reports.
+        </p>
+        {% if demo_mode %}
+        <div class="demo-banner">
+          <strong>Demo mode:</strong> built-in scenarios are active when live market or model credentials are not configured.
         </div>
-
-        <aside class="hero-panel hero-side-panel">
-          <p class="eyebrow">Evaluation Fit</p>
-          <h2>Built to look like a product, not a notebook.</h2>
-          <div class="hero-checklist">
-            <div class="check-item">
-              <strong>Public product shape</strong>
-              <span>One web surface for research runs, artifacts, and demo scenarios.</span>
-            </div>
-            <div class="check-item">
-              <strong>Grounded outputs</strong>
-              <span>Alpha Vantage, SEC EDGAR, and FRED are surfaced as explicit source layers.</span>
-            </div>
-            <div class="check-item">
-              <strong>Low-risk demo</strong>
-              <span>Deterministic demo mode avoids rate limits and keeps presentation cost controlled.</span>
-            </div>
-          </div>
-          <p class="course-statement">
-            This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
-          </p>
-        </aside>
+        {% endif %}
       </div>
+
+      <aside class="session-card">
+        <p class="eyebrow">Current Session</p>
+        <div class="session-card-row">
+          <span class="session-label">Session ID</span>
+          <strong id="session-id-label">starting…</strong>
+        </div>
+        <div class="session-card-row">
+          <span class="session-label">Focus</span>
+          <strong id="session-focus-label">No tickers yet</strong>
+        </div>
+        <div class="session-card-row">
+          <span class="session-label">Mode</span>
+          <strong>{% if demo_mode %}Demo mode{% else %}Live mode{% endif %}</strong>
+        </div>
+        <p class="course-statement">
+          This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+        </p>
+      </aside>
     </section>
 
     <section class="source-strip">
       <article class="source-card">
         <p class="eyebrow">Source Stack</p>
         <h2>Alpha Vantage</h2>
-        <p>Price history, company overview, and optional news sentiment for live market runs.</p>
+        <p>Price history, company overview, and optional sentiment data for market context.</p>
       </article>
       <article class="source-card">
         <p class="eyebrow">Source Stack</p>
         <h2>SEC EDGAR</h2>
-        <p>Official company filings and filing-backed facts for grounding company-level statements.</p>
+        <p>Official U.S. filings and filing-backed facts for grounded company analysis.</p>
       </article>
       <article class="source-card">
         <p class="eyebrow">Source Stack</p>
         <h2>FRED</h2>
-        <p>Macro time series for rate, inflation, and broader market-context questions.</p>
+        <p>Macro time series for rates, inflation, and broader market framing.</p>
       </article>
     </section>
 
-    <section class="workspace-grid">
-      <form id="run-form" class="composer">
-        <div class="section-head">
-          <p class="eyebrow">Run The Agent</p>
-          <h2>Research Composer</h2>
-          <p class="section-copy">Use one of the guided scenarios or write your own research question.</p>
+    <section class="app-grid">
+      <section class="chat-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Research Chat</p>
+            <h2>Talk to the financial agent.</h2>
+          </div>
+          <button id="new-session-button" type="button" class="secondary-btn">New Session</button>
         </div>
-
-        <label class="field-label" for="tickers">Tickers</label>
-        <input id="tickers" name="tickers" type="text" placeholder="AAPL, MSFT, NVDA" required>
-
-        <label class="field-label" for="prompt">Research Question</label>
-        <textarea id="prompt" name="prompt" rows="6" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent price performance." required></textarea>
 
         <div class="scenario-grid">
           <button type="button" class="scenario-card prompt-chip" data-prompt="Summarize AAPL and show the recent price trend." data-tickers="AAPL">
             <span class="scenario-title">Single-stock brief</span>
-            <span class="scenario-copy">AAPL snapshot, recent trend, filing-backed summary.</span>
+            <span class="scenario-copy">AAPL overview, price trend, and filing-backed summary.</span>
           </button>
           <button type="button" class="scenario-card prompt-chip" data-prompt="Compare AMD and NVDA on valuation, growth, and recent performance." data-tickers="AMD, NVDA">
             <span class="scenario-title">Peer comparison</span>
-            <span class="scenario-copy">AMD vs NVDA on valuation, revenue scale, and relative performance.</span>
+            <span class="scenario-copy">Compare two semiconductor names in one session.</span>
           </button>
           <button type="button" class="scenario-card prompt-chip" data-prompt="Give me a market snapshot for SPY and highlight the main risks." data-tickers="SPY">
             <span class="scenario-title">ETF snapshot</span>
-            <span class="scenario-copy">Index-level market view with macro framing and key risks.</span>
+            <span class="scenario-copy">Use the workspace for an index-level market view.</span>
           </button>
         </div>
 
-        <button type="submit" class="primary-btn">Run Agent</button>
-        <p class="disclaimer">For research use only. Not investment advice.</p>
-      </form>
+        <div id="chat-thread" class="chat-thread"></div>
 
-      <section class="status-card">
-        <div class="status-header">
-          <p class="eyebrow">Live Run</p>
-          <span id="status-pill" class="status-pill idle">Idle</span>
-        </div>
-        <div class="pipeline-strip">
-          <div class="pipeline-step">
-            <strong>01</strong>
-            <span>Fetch</span>
+        <form id="chat-form" class="composer">
+          <label class="field-label" for="tickers">Ticker Focus</label>
+          <input id="tickers" name="tickers" type="text" placeholder="AAPL, NVDA, SPY">
+
+          <label class="field-label" for="prompt">Message</label>
+          <textarea id="prompt" name="prompt" rows="4" placeholder="Compare AMD and NVDA on valuation, latest fundamentals, and recent performance." required></textarea>
+
+          <div class="composer-actions">
+            <p class="disclaimer">For research use only. Not investment advice.</p>
+            <button id="submit-button" type="submit" class="primary-btn">Send</button>
           </div>
-          <div class="pipeline-step">
-            <strong>02</strong>
-            <span>Normalize</span>
-          </div>
-          <div class="pipeline-step">
-            <strong>03</strong>
-            <span>Compare</span>
-          </div>
-          <div class="pipeline-step">
-            <strong>04</strong>
-            <span>Deliver</span>
-          </div>
-        </div>
-        <p class="status-note">
-          Demo mode keeps the live presentation stable and holds the effective test cost at SGD 0 in demo mode.
-        </p>
-        <div id="event-log" class="event-log"></div>
+        </form>
       </section>
-    </section>
 
-    <section class="results-card">
-      <div class="results-header">
-        <p class="eyebrow">Results</p>
-        <h2>Research Workbench</h2>
-      </div>
-      <article>
-        <h3>Snapshot Cards</h3>
-        <div id="snapshot-cards" class="snapshot-grid"></div>
-      </article>
-      <article>
-        <h3>Research Brief</h3>
-        <div id="summary-text" class="summary-block">No run yet.</div>
-      </article>
-      <article>
-        <h3>Comparison Tables</h3>
-        <div id="table-previews" class="preview-grid"></div>
-      </article>
-      <article>
-        <h3>Charts</h3>
-        <div id="chart-previews" class="chart-grid"></div>
-      </article>
-      <article>
-        <h3>Artifacts</h3>
-        <div id="artifacts" class="artifact-list"></div>
-      </article>
+      <aside class="workspace-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Conversation + Workspace</p>
+            <h2>Live research outputs</h2>
+          </div>
+          <span id="status-pill" class="status-pill idle">idle</span>
+        </div>
+
+        <div class="workspace-summary">
+          <div class="metric-card">
+            <span class="metric-value">Chat</span>
+            <span class="metric-label">LLM replies stay in the thread</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value">Artifacts</span>
+            <span class="metric-label">Tables, charts, markdown, downloads</span>
+          </div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Live Run</h3>
+          <div id="event-log" class="event-log"></div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Snapshot Cards</h3>
+          <div id="snapshot-cards" class="snapshot-grid"></div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Research Brief</h3>
+          <div id="summary-text" class="summary-block">No research brief yet.</div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Comparison Tables</h3>
+          <div id="table-previews" class="preview-grid"></div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Charts</h3>
+          <div id="chart-previews" class="chart-grid"></div>
+        </div>
+
+        <div class="workspace-block">
+          <h3>Artifacts</h3>
+          <div id="artifacts" class="artifact-list"></div>
+        </div>
+      </aside>
     </section>
 
     <footer class="site-footer">
-      <p>
-        This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
-      </p>
+      <p>This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.</p>
       <div class="footer-links">
         <a href="https://www.alphavantage.co/documentation/" target="_blank" rel="noreferrer">Alpha Vantage</a>
         <a href="https://www.sec.gov/search-filings/edgar-application-programming-interfaces" target="_blank" rel="noreferrer">SEC EDGAR</a>

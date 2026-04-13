@@ -51,6 +51,55 @@ def create_app(service: RunService | None = None) -> FastAPI:
             },
         )
 
+    @app.post("/api/sessions")
+    async def create_session(tickers: str = Form(default="")):
+        session = await app.state.run_service.create_session(tickers)
+        return JSONResponse(
+            status_code=201,
+            content={
+                "session_id": session.session_id,
+                "status_url": f"/api/sessions/{session.session_id}",
+                "events_url": f"/api/sessions/{session.session_id}/events",
+            },
+        )
+
+    @app.get("/api/sessions/{session_id}")
+    async def get_session(session_id: str):
+        try:
+            session = app.state.run_service.get_session(session_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Session not found")
+        return session.to_dict()
+
+    @app.post("/api/sessions/{session_id}/messages")
+    async def create_session_message(
+        session_id: str,
+        prompt: str = Form(...),
+        tickers: str = Form(default=""),
+        files: list[UploadFile] | None = File(default=None),
+    ):
+        try:
+            record = await app.state.run_service.create_session_message(session_id, prompt, tickers, files)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Session not found")
+        return JSONResponse(
+            status_code=202,
+            content={
+                "session_id": session_id,
+                "run_id": record.run_id,
+                "status_url": f"/api/sessions/{session_id}",
+                "events_url": f"/api/sessions/{session_id}/events",
+            },
+        )
+
+    @app.get("/api/sessions/{session_id}/events")
+    async def stream_session_events(session_id: str):
+        try:
+            app.state.run_service.get_session(session_id)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Session not found")
+        return StreamingResponse(app.state.run_service.stream_session_events(session_id), media_type="text/event-stream")
+
     @app.get("/api/runs/{run_id}")
     async def get_run(run_id: str):
         try:

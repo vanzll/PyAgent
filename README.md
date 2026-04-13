@@ -81,13 +81,14 @@ pip install 'cave-agent[openai,webapp]'
 
 ## Financial Research Agent
 
-CaveAgent now includes a single-process FastAPI workbench for public-market research. The app accepts one or more U.S. equity or ETF tickers, retrieves public market and filing data, and lets an agent generate charts, comparison tables, and a short research brief.
+CaveAgent now includes a single-process FastAPI chat workspace for public-market research. The app accepts one or more U.S. equity or ETF tickers, keeps a multi-turn conversation history, and lets an agent reply in chat while generating charts, comparison tables, and a short research brief in a live workspace.
 
 ### What It Does
 
 - Enter one or more tickers such as `AAPL`, `NVDA`, or `SPY`
-- Ask a research question in plain English
-- Stream run status back to the browser
+- Ask follow-up research questions in plain English inside a persistent chat session
+- Stream run status back to the browser while the conversation continues
+- View generated comparison tables, charts, and markdown summaries beside the chat thread
 - Download generated comparison tables, charts, and markdown summaries
 - Mark every output as research-only, not investment advice
 

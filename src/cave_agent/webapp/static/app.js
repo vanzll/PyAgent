@@ -1,6 +1,11 @@
-const form = document.getElementById("run-form");
+const sessionStorageKey = "pyagent-active-session";
+
+const form = document.getElementById("chat-form");
 const tickersInput = document.getElementById("tickers");
 const promptInput = document.getElementById("prompt");
+const submitButton = document.getElementById("submit-button");
+const newSessionButton = document.getElementById("new-session-button");
+const chatThread = document.getElementById("chat-thread");
 const eventLog = document.getElementById("event-log");
 const snapshotCards = document.getElementById("snapshot-cards");
 const summaryText = document.getElementById("summary-text");
@@ -9,8 +14,15 @@ const tablePreviews = document.getElementById("table-previews");
 const chartPreviews = document.getElementById("chart-previews");
 const statusPill = document.getElementById("status-pill");
 const promptChips = document.querySelectorAll(".prompt-chip");
-const submitButton = form.querySelector('button[type="submit"]');
-let activePollToken = 0;
+const sessionIdLabel = document.getElementById("session-id-label");
+const sessionFocusLabel = document.getElementById("session-focus-label");
+
+const state = {
+  sessionId: null,
+  currentRunId: null,
+  activePollToken: 0,
+  eventSource: null,
+};
 
 function renderEmptyState(container, message) {
   container.innerHTML = `<div class="empty-state">${message}</div>`;
@@ -30,7 +42,7 @@ function setStatus(status) {
 
 function setSubmitting(submitting) {
   submitButton.disabled = submitting;
-  submitButton.textContent = submitting ? "Running Agent..." : "Run Agent";
+  submitButton.textContent = submitting ? "Running..." : "Send";
 }
 
 function formatMetric(value, currency = false) {
@@ -40,9 +52,9 @@ function formatMetric(value, currency = false) {
   if (typeof value === "number") {
     const absolute = Math.abs(value);
     if (currency) {
-      if (absolute >= 1_000_000_000_000) return `$${(value / 1_000_000_000_000).toFixed(2)}T`;
-      if (absolute >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(1)}B`;
-      if (absolute >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
+      if (absolute >= 1000000000000) return `$${(value / 1000000000000).toFixed(2)}T`;
+      if (absolute >= 1000000000) return `$${(value / 1000000000).toFixed(1)}B`;
+      if (absolute >= 1000000) return `$${(value / 1000000).toFixed(1)}M`;
       return `$${value.toFixed(1)}`;
     }
     return value.toFixed(1);
@@ -50,9 +62,46 @@ function formatMetric(value, currency = false) {
   return value;
 }
 
-function renderArtifacts(runId, artifacts) {
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function renderMessages(messages) {
+  if (!messages.length) {
+    renderEmptyState(
+      chatThread,
+      "Start a session by asking about a ticker. The assistant will answer in chat and populate the workspace."
+    );
+    return;
+  }
+
+  chatThread.innerHTML = "";
+  messages.forEach((message) => {
+    const node = document.createElement("article");
+    node.className = `chat-message ${message.role}`;
+    const runMeta = message.run_id ? `<span class="message-run">Run ${message.run_id}</span>` : "";
+    const focus = message.tickers && message.tickers.length ? message.tickers.join(", ") : "Session context";
+    node.innerHTML = `
+      <div class="message-meta">
+        <span class="message-role">${message.role === "assistant" ? "Agent" : "You"}</span>
+        <span class="message-focus">${escapeHtml(focus)}</span>
+        ${runMeta}
+      </div>
+      <div class="message-body">${escapeHtml(message.content).replaceAll("\n", "<br>")}</div>
+    `;
+    chatThread.appendChild(node);
+  });
+  chatThread.scrollTop = chatThread.scrollHeight;
+}
+
+function renderArtifacts(artifacts) {
   if (!artifacts.length) {
-    renderEmptyState(artifactList, "Artifacts will appear here when the run completes.");
+    renderEmptyState(artifactList, "Artifacts will appear here after the agent completes a turn.");
     return;
   }
 
@@ -62,10 +111,10 @@ function renderArtifacts(runId, artifacts) {
     node.className = "artifact-item";
     node.innerHTML = `
       <div>
-        <a href="/api/runs/${runId}/artifacts/${artifact.name}">${artifact.label}</a>
-        <div>${artifact.name}</div>
+        <a href="${artifact.url || "#"}">${escapeHtml(artifact.label)}</a>
+        <div>${escapeHtml(artifact.name)}</div>
       </div>
-      <span class="artifact-kind">${artifact.kind}</span>
+      <span class="artifact-kind">${escapeHtml(artifact.kind)}</span>
     `;
     artifactList.appendChild(node);
   });
@@ -73,7 +122,7 @@ function renderArtifacts(runId, artifacts) {
 
 function renderSnapshotCards(cards) {
   if (!cards.length) {
-    renderEmptyState(snapshotCards, "Snapshot cards will appear after the agent grounds the run in market data.");
+    renderEmptyState(snapshotCards, "Snapshot cards will appear after the agent grounds the turn in market data.");
     return;
   }
 
@@ -82,17 +131,17 @@ function renderSnapshotCards(cards) {
     const wrapper = document.createElement("div");
     wrapper.className = "snapshot-card";
     wrapper.innerHTML = `
-      <h3>${card.ticker}</h3>
-      <p><strong>${card.name}</strong><br>${card.sector}</p>
+      <h3>${escapeHtml(card.ticker)}</h3>
+      <p><strong>${escapeHtml(card.name)}</strong><br>${escapeHtml(card.sector)}</p>
       <div class="snapshot-metrics">
         <div><span>Last Price</span><strong>${formatMetric(card.latest_close, true)}</strong></div>
         <div><span>P/E</span><strong>${formatMetric(card.pe_ratio)}</strong></div>
         <div><span>Market Cap</span><strong>${formatMetric(card.market_cap, true)}</strong></div>
-        <div><span>Latest Revenue</span><strong>${formatMetric(card.latest_revenue, true)}</strong></div>
+        <div><span>Revenue</span><strong>${formatMetric(card.latest_revenue, true)}</strong></div>
         <div><span>Net Income</span><strong>${formatMetric(card.latest_net_income, true)}</strong></div>
-        <div><span>Recent Filing</span><strong>${card.recent_filing_form || "n/a"}</strong></div>
+        <div><span>Filing</span><strong>${escapeHtml(card.recent_filing_form || "n/a")}</strong></div>
       </div>
-      <p>${card.description || ""}</p>
+      <p>${escapeHtml(card.description || "")}</p>
     `;
     snapshotCards.appendChild(wrapper);
   });
@@ -108,9 +157,11 @@ function renderTables(previews) {
   previews.forEach((preview) => {
     const wrapper = document.createElement("div");
     wrapper.className = "preview-card";
-    const thead = `<tr>${preview.columns.map((column) => `<th>${column}</th>`).join("")}</tr>`;
-    const rows = preview.rows.map((row) => `<tr>${row.map((cell) => `<td>${cell ?? ""}</td>`).join("")}</tr>`).join("");
-    wrapper.innerHTML = `<h3>${preview.name}</h3><table class="preview-table"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+    const thead = `<tr>${preview.columns.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}</tr>`;
+    const rows = preview.rows
+      .map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell === null || cell === undefined ? "" : cell)}</td>`).join("")}</tr>`)
+      .join("");
+    wrapper.innerHTML = `<h3>${escapeHtml(preview.name)}</h3><table class="preview-table"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
     tablePreviews.appendChild(wrapper);
   });
 }
@@ -125,42 +176,95 @@ function renderCharts(previews) {
   previews.forEach((preview) => {
     const wrapper = document.createElement("div");
     wrapper.className = "preview-card chart-card";
-    wrapper.innerHTML = `<h3>${preview.label || preview.name}</h3><img src="${preview.url}" alt="${preview.label || preview.name}">`;
+    wrapper.innerHTML = `
+      <h3>${escapeHtml(preview.label || preview.name)}</h3>
+      <img src="${preview.url}" alt="${escapeHtml(preview.label || preview.name)}">
+    `;
     chartPreviews.appendChild(wrapper);
   });
 }
 
-async function fetchRun(runId) {
-  const response = await fetch(`/api/runs/${runId}`);
+async function fetchSession(sessionId) {
+  const response = await fetch(`/api/sessions/${sessionId}`);
   if (!response.ok) {
-    throw new Error("Unable to fetch run result");
+    throw new Error("Unable to fetch session");
   }
   const payload = await response.json();
-  summaryText.textContent = payload.summary_text || payload.error_message || "No summary generated.";
-  renderSnapshotCards(payload.snapshot_cards || []);
-  renderArtifacts(runId, payload.artifacts || []);
-  renderTables(payload.preview_tables || []);
-  renderCharts(payload.preview_charts || []);
+  renderSession(payload);
   return payload;
 }
 
-async function pollRunUntilDone(runId, pollToken) {
-  while (pollToken === activePollToken) {
+function renderSession(payload) {
+  state.sessionId = payload.session_id;
+  state.currentRunId = payload.run_id || null;
+  sessionIdLabel.textContent = payload.session_id;
+  sessionFocusLabel.textContent = payload.tickers.length ? payload.tickers.join(", ") : "No tickers yet";
+  if (payload.tickers.length) {
+    tickersInput.value = payload.tickers.join(", ");
+  }
+  renderMessages(payload.messages || []);
+  summaryText.textContent = payload.summary_text || "No research brief yet.";
+  renderSnapshotCards(payload.snapshot_cards || []);
+  renderArtifacts(payload.artifacts || []);
+  renderTables(payload.preview_tables || []);
+  renderCharts(payload.preview_charts || []);
+  setStatus(payload.status || "idle");
+}
+
+function closeEventStream() {
+  if (state.eventSource) {
+    state.eventSource.close();
+    state.eventSource = null;
+  }
+}
+
+async function createSession(initialTickers = "") {
+  const formData = new FormData();
+  formData.set("tickers", initialTickers);
+  const response = await fetch("/api/sessions", { method: "POST", body: formData });
+  if (!response.ok) {
+    throw new Error("Unable to create session");
+  }
+  const payload = await response.json();
+  state.sessionId = payload.session_id;
+  localStorage.setItem(sessionStorageKey, payload.session_id);
+  appendEvent(`session created: ${payload.session_id}`);
+  return payload.session_id;
+}
+
+async function ensureSession() {
+  if (state.sessionId) {
+    return state.sessionId;
+  }
+
+  const storedSessionId = localStorage.getItem(sessionStorageKey);
+  if (storedSessionId) {
     try {
-      const payload = await fetchRun(runId);
-      if (pollToken !== activePollToken) {
+      await fetchSession(storedSessionId);
+      return storedSessionId;
+    } catch (error) {
+      localStorage.removeItem(sessionStorageKey);
+    }
+  }
+
+  const sessionId = await createSession(tickersInput.value.trim());
+  await fetchSession(sessionId);
+  return sessionId;
+}
+
+async function pollSessionUntilSettled(sessionId, runId, pollToken) {
+  while (pollToken === state.activePollToken) {
+    try {
+      const payload = await fetchSession(sessionId);
+      if (pollToken !== state.activePollToken) {
         return;
       }
-
-      if (payload.status) {
-        setStatus(payload.status);
-      }
-      if (payload.status === "completed" || payload.status === "failed") {
+      if ((payload.status === "completed" || payload.status === "failed") && payload.run_id === runId) {
         setSubmitting(false);
         return;
       }
     } catch (error) {
-      if (pollToken !== activePollToken) {
+      if (pollToken !== state.activePollToken) {
         return;
       }
       appendEvent(error.message || "Polling failed");
@@ -170,82 +274,145 @@ async function pollRunUntilDone(runId, pollToken) {
   }
 }
 
+function startSessionEvents(sessionId, runId) {
+  closeEventStream();
+  const stream = new EventSource(`/api/sessions/${sessionId}/events`);
+  state.eventSource = stream;
+
+  stream.addEventListener("session", (evt) => {
+    const data = JSON.parse(evt.data);
+    setStatus(data.status || "idle");
+  });
+  stream.addEventListener("user", (evt) => {
+    const data = JSON.parse(evt.data);
+    appendEvent(`user: ${data.content}`);
+  });
+  stream.addEventListener("status", (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.run_id && data.run_id !== runId) {
+      return;
+    }
+    setStatus(data.status || "running");
+    appendEvent(data.message || data.status || "status");
+  });
+  stream.addEventListener("artifact", (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.run_id && data.run_id !== runId) {
+      return;
+    }
+    appendEvent(`artifact ready: ${data.name}`);
+  });
+  stream.addEventListener("completed", async (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.run_id && data.run_id !== runId) {
+      return;
+    }
+    state.activePollToken += 1;
+    setStatus("completed");
+    appendEvent("turn completed");
+    closeEventStream();
+    await fetchSession(sessionId);
+    setSubmitting(false);
+  });
+  stream.addEventListener("failed", async (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.run_id && data.run_id !== runId) {
+      return;
+    }
+    state.activePollToken += 1;
+    setStatus("failed");
+    appendEvent(`turn failed: ${data.message || "unknown error"}`);
+    closeEventStream();
+    await fetchSession(sessionId);
+    setSubmitting(false);
+  });
+  stream.onerror = () => {
+    closeEventStream();
+    appendEvent("event stream unavailable, using polling fallback");
+  };
+}
+
+function clearWorkspaceForPendingRun() {
+  summaryText.textContent = "Working...";
+  renderEmptyState(snapshotCards, "Waiting for the agent to update the workspace.");
+  renderEmptyState(tablePreviews, "Waiting for table artifacts.");
+  renderEmptyState(chartPreviews, "Waiting for chart artifacts.");
+  renderEmptyState(artifactList, "Waiting for downloadable artifacts.");
+}
+
 promptChips.forEach((chip) => {
   chip.addEventListener("click", () => {
     tickersInput.value = chip.dataset.tickers || "";
     promptInput.value = chip.dataset.prompt || "";
-    tickersInput.focus();
+    promptInput.focus();
   });
 });
 
-renderEmptyState(snapshotCards, "Snapshot cards will appear after the agent grounds the run in market data.");
-renderEmptyState(tablePreviews, "Comparison tables will appear here.");
-renderEmptyState(chartPreviews, "Generated charts will appear here.");
-renderEmptyState(artifactList, "Artifacts will appear here when the run completes.");
+newSessionButton.addEventListener("click", async () => {
+  try {
+    closeEventStream();
+    state.activePollToken += 1;
+    eventLog.innerHTML = "";
+    renderEmptyState(chatThread, "Starting a new session…");
+    const sessionId = await createSession("");
+    await fetchSession(sessionId);
+  } catch (error) {
+    appendEvent(error.message || "Unable to start a new session");
+  }
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  eventLog.innerHTML = "";
-  summaryText.textContent = "Working...";
-  setStatus("running");
-  setSubmitting(true);
-  renderEmptyState(snapshotCards, "Waiting for the agent to finish the run.");
-  renderEmptyState(tablePreviews, "Waiting for the agent to generate table artifacts.");
-  renderEmptyState(chartPreviews, "Waiting for the agent to generate chart artifacts.");
-  renderEmptyState(artifactList, "Waiting for the agent to export run artifacts.");
+  const prompt = promptInput.value.trim();
+  const tickers = tickersInput.value.trim();
+  if (!prompt) {
+    return;
+  }
 
   try {
-    const formData = new FormData(form);
-    const response = await fetch("/api/runs", {
+    const sessionId = await ensureSession();
+    setSubmitting(true);
+    setStatus("running");
+    clearWorkspaceForPendingRun();
+
+    const formData = new FormData();
+    formData.set("prompt", prompt);
+    if (tickers) {
+      formData.set("tickers", tickers);
+    }
+
+    const response = await fetch(`/api/sessions/${sessionId}/messages`, {
       method: "POST",
       body: formData,
     });
     if (!response.ok) {
-      throw new Error("Run creation failed");
+      throw new Error("Unable to send message");
     }
 
     const payload = await response.json();
-    const runId = payload.run_id;
-    appendEvent(`run created: ${runId}`);
-    const pollToken = ++activePollToken;
-    pollRunUntilDone(runId, pollToken);
-
-    const stream = new EventSource(`/api/runs/${runId}/events`);
-    stream.addEventListener("status", (evt) => {
-      const data = JSON.parse(evt.data);
-      setStatus(data.status || "running");
-      appendEvent(data.message || data.status || "status");
-    });
-    stream.addEventListener("artifact", (evt) => {
-      const data = JSON.parse(evt.data);
-      appendEvent(`artifact ready: ${data.name}`);
-    });
-    stream.addEventListener("completed", async () => {
-      setStatus("completed");
-      appendEvent("run completed");
-      activePollToken += 1;
-      stream.close();
-      await fetchRun(runId);
-      setSubmitting(false);
-    });
-    stream.addEventListener("failed", async (evt) => {
-      const data = JSON.parse(evt.data);
-      setStatus("failed");
-      appendEvent(`run failed: ${data.message}`);
-      activePollToken += 1;
-      stream.close();
-      await fetchRun(runId);
-      setSubmitting(false);
-    });
-    stream.onerror = () => {
-      stream.close();
-      appendEvent("event stream unavailable, using polling fallback");
-    };
+    state.currentRunId = payload.run_id;
+    promptInput.value = "";
+    appendEvent(`run created: ${payload.run_id}`);
+    await fetchSession(sessionId);
+    startSessionEvents(sessionId, payload.run_id);
+    const pollToken = ++state.activePollToken;
+    pollSessionUntilSettled(sessionId, payload.run_id, pollToken);
   } catch (error) {
-    activePollToken += 1;
+    state.activePollToken += 1;
     setStatus("failed");
-    summaryText.textContent = error.message || "Unable to start the run.";
-    appendEvent(summaryText.textContent);
     setSubmitting(false);
+    appendEvent(error.message || "Unable to send message");
+    summaryText.textContent = error.message || "Unable to send message";
   }
+});
+
+renderEmptyState(chatThread, "Start a session by asking about a ticker. The assistant will answer in chat and populate the workspace.");
+renderEmptyState(snapshotCards, "Snapshot cards will appear after the agent grounds the turn in market data.");
+renderEmptyState(tablePreviews, "Comparison tables will appear here.");
+renderEmptyState(chartPreviews, "Generated charts will appear here.");
+renderEmptyState(artifactList, "Artifacts will appear here after the agent completes a turn.");
+
+ensureSession().catch((error) => {
+  setStatus("failed");
+  appendEvent(error.message || "Unable to initialize the session");
 });
