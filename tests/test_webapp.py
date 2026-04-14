@@ -304,3 +304,17 @@ def test_webapp_session_endpoint_sanitizes_nan_values(tmp_path: Path) -> None:
     assert payload["snapshot_cards"][0]["market_cap"] is None
     assert payload["snapshot_cards"][0]["pe_ratio"] is None
     assert payload["preview_tables"][0]["rows"][0][1] is None
+
+
+def test_webapp_returns_prompt_inference_error_as_bad_request(tmp_path: Path) -> None:
+    service = RunService(storage_root=tmp_path, runner=FakeRunner())
+    client = TestClient(create_app(service))
+
+    session_id = client.post("/api/sessions").json()["session_id"]
+    response = client.post(
+        f"/api/sessions/{session_id}/messages",
+        data={"prompt": "hello"},
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Could not infer a company, ETF, or market proxy from the prompt."

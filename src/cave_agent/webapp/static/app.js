@@ -22,6 +22,7 @@ const state = {
   activePollToken: 0,
   eventSource: null,
 };
+const maxEventItems = 8;
 
 function renderEmptyState(container, message) {
   container.innerHTML = `<div class="empty-state">${message}</div>`;
@@ -36,6 +37,9 @@ function appendEvent(message) {
   item.className = "event-item";
   item.textContent = message;
   eventLog.prepend(item);
+  while (eventLog.children.length > maxEventItems) {
+    eventLog.removeChild(eventLog.lastElementChild);
+  }
 }
 
 function setStatus(status) {
@@ -196,11 +200,26 @@ function renderCharts(previews) {
 async function fetchSession(sessionId) {
   const response = await fetch(`/api/sessions/${sessionId}`);
   if (!response.ok) {
-    throw new Error("Unable to fetch session");
+    throw new Error(await readErrorMessage(response, "Unable to fetch session"));
   }
   const payload = await response.json();
   renderSession(payload);
   return payload;
+}
+
+async function readErrorMessage(response, fallbackMessage) {
+  try {
+    const payload = await response.json();
+    if (typeof payload?.detail === "string" && payload.detail.trim()) {
+      return payload.detail;
+    }
+    if (typeof payload?.message === "string" && payload.message.trim()) {
+      return payload.message;
+    }
+  } catch (error) {
+    // ignore parse failures and use fallback below
+  }
+  return fallbackMessage;
 }
 
 function renderSession(payload) {
@@ -235,7 +254,7 @@ async function createSession(initialTickers = "") {
   }
   const response = await fetch("/api/sessions", { method: "POST", body: formData });
   if (!response.ok) {
-    throw new Error("Unable to create session");
+    throw new Error(await readErrorMessage(response, "Unable to create session"));
   }
   const payload = await response.json();
   state.sessionId = payload.session_id;
@@ -393,7 +412,7 @@ form.addEventListener("submit", async (event) => {
       body: formData,
     });
     if (!response.ok) {
-      throw new Error("Unable to send message");
+      throw new Error(await readErrorMessage(response, "Unable to send message"));
     }
 
     const payload = await response.json();

@@ -371,6 +371,12 @@ textarea {
   gap: 12px;
 }
 
+.event-log {
+  max-height: 280px;
+  overflow-y: auto;
+  align-content: start;
+}
+
 .event-item,
 .artifact-item,
 .preview-card,

@@ -39,7 +39,10 @@ def create_app(service: RunService | None = None) -> FastAPI:
         tickers: str = Form(default=""),
         files: list[UploadFile] | None = File(default=None),
     ):
-        record = await app.state.run_service.create_run(prompt, tickers, files)
+        try:
+            record = await app.state.run_service.create_run(prompt, tickers, files)
+        except RuntimeError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
         return JSONResponse(
             status_code=202,
             content={
@@ -80,6 +83,8 @@ def create_app(service: RunService | None = None) -> FastAPI:
             record = await app.state.run_service.create_session_message(session_id, prompt, tickers, files)
         except KeyError:
             raise HTTPException(status_code=404, detail="Session not found")
+        except RuntimeError as exc:
+            raise HTTPException(status_code=400, detail=str(exc))
         return JSONResponse(
             status_code=202,
             content={
