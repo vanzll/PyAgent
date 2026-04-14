@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 
 import httpx
+import pandas as pd
 import pytest
 
 import cave_agent.webapp.agent_runner as agent_runner_module
@@ -249,6 +250,106 @@ async def test_financial_research_runner_uses_deterministic_demo_without_model(t
 
 
 @pytest.mark.asyncio
+async def test_alpha_vantage_client_falls_back_when_adjusted_and_overview_are_unavailable() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        function = request.url.params["function"]
+        if function == "TIME_SERIES_DAILY_ADJUSTED":
+            return httpx.Response(200, json={"Information": "Adjusted endpoint unavailable"})
+        if function == "TIME_SERIES_DAILY":
+            return httpx.Response(
+                200,
+                json={
+                    "Time Series (Daily)": {
+                        "2026-04-11": {
+                            "1. open": "198.0",
+                            "2. high": "201.0",
+                            "3. low": "197.5",
+                            "4. close": "200.0",
+                            "6. volume": "1200",
+                        },
+                        "2026-04-10": {
+                            "1. open": "196.0",
+                            "2. high": "199.0",
+                            "3. low": "195.5",
+                            "4. close": "198.0",
+                            "6. volume": "1100",
+                        },
+                    }
+                },
+            )
+        if function == "OVERVIEW":
+            return httpx.Response(200, json={"Information": "Overview unavailable"})
+        if function == "ETF_PROFILE":
+            return httpx.Response(200, json={})
+        if function == "GLOBAL_QUOTE":
+            return httpx.Response(
+                200,
+                json={
+                    "Global Quote": {
+                        "05. price": "200.0",
+                        "07. latest trading day": "2026-04-11",
+                    }
+                },
+            )
+        raise AssertionError(f"Unexpected function: {function}")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://www.alphavantage.co") as client:
+        alpha = AlphaVantageClient(api_key="demo", http_client=client)
+        snapshot = await alpha.fetch_security_snapshot("AAPL")
+
+    assert snapshot["market_snapshot"]["latest_close"] == 200.0
+    assert not snapshot["price_history"].empty
+    assert snapshot["profile"]["name"] == "AAPL"
+
+
+@pytest.mark.asyncio
+async def test_financial_data_provider_uses_sec_company_name_when_alpha_profile_is_sparse() -> None:
+    class FakeAlpha:
+        async def fetch_security_snapshot(self, ticker: str, include_news: bool = False):
+            return {
+                "ticker": ticker,
+                "profile": {
+                    "name": ticker,
+                    "sector": "Unknown",
+                    "description": "",
+                    "market_cap": None,
+                    "pe_ratio": None,
+                    "week_52_high": None,
+                    "week_52_low": None,
+                },
+                "market_snapshot": {
+                    "latest_close": 200.0,
+                    "market_cap": None,
+                    "pe_ratio": None,
+                    "week_52_high": None,
+                    "week_52_low": None,
+                },
+                "price_history": pd.DataFrame(
+                    [
+                        {"date": "2026-04-10", "open": 198.0, "high": 201.0, "low": 197.0, "close": 200.0, "adjusted_close": 200.0, "volume": 1000}
+                    ]
+                ),
+                "news_items": [],
+            }
+
+    class FakeSec:
+        async def fetch_company_profile(self, ticker: str):
+            return {
+                "ticker": ticker,
+                "company_name": "Apple Inc.",
+                "cik": "0000320193",
+                "recent_filings": [{"form": "10-Q", "filing_date": "2026-02-01"}],
+                "company_facts": {"latest_revenue": 1000, "latest_net_income": 200},
+            }
+
+    provider = FinancialDataProvider(alpha_vantage=FakeAlpha(), sec_edgar=FakeSec(), fred=None)
+    bundle = await provider.build_bundle(["AAPL"], "Summarize Apple")
+
+    assert bundle["securities"]["AAPL"]["profile"]["name"] == "Apple Inc."
+    assert bundle["comparison_frame"].iloc[0]["name"] == "Apple Inc."
+
+
+@pytest.mark.asyncio
 async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
     monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")
@@ -300,3 +401,33 @@ def test_financial_research_runner_demo_summary_tolerates_missing_numeric_values
     assert "latest close n/a" in summary
     assert "market cap n/a" in summary
     assert "P/E n/a" in summary
+
+
+@pytest.mark.asyncio
+async def test_financial_research_runner_timeout_clears_partial_outputs(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
+    monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")
+    monkeypatch.setenv("WEBAPP_AGENT_TIMEOUT_SECONDS", "0.01")
+    monkeypatch.setattr(FinancialResearchRunner, "_build_model", lambda self: object())
+
+    class HangingAgent:
+        def __init__(self, *args, **kwargs):
+            self.runtime = kwargs["runtime"]
+
+        async def run(self, *_args, **_kwargs):
+            workspace = await self.runtime.retrieve("workspace")
+            workspace.save_dataframe(pd.DataFrame([{"x": 1}]), "partial", format="csv")
+            await asyncio.sleep(0.2)
+
+    monkeypatch.setattr(agent_runner_module, "CaveAgent", HangingAgent)
+
+    runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
+    result = await runner.run(
+        "Compare AMD and NVDA",
+        ParsedInputBundle(tickers=["AMD", "NVDA"]),
+        tmp_path,
+        lambda *_args, **_kwargs: None,
+    )
+
+    artifact_names = sorted(artifact.name for artifact in result.artifacts)
+    assert artifact_names == ["comparison.csv", "normalized-returns.png", "summary.md"]

@@ -59,6 +59,12 @@ class ArtifactWorkspace:
     def list_artifacts(self) -> list[ArtifactRecord]:
         return self._artifacts
 
+    def clear_outputs(self) -> None:
+        self._artifacts = []
+        self.preview_tables = []
+        self.preview_charts = []
+        self.summary_text = ""
+
     def _preview_table(self, name: str, dataframe: pd.DataFrame) -> dict[str, Any]:
         preview = dataframe.head(10)
         return {
@@ -186,6 +192,7 @@ class FinancialResearchRunner:
         except Exception as exc:
             emit("status", {"message": f"LLM failed, using fallback summary: {exc}"})
 
+        artifact_workspace.clear_outputs()
         summary_text = self._build_demo_summary(research_bundle, prompt)
         if not any(artifact.name == "summary.md" for artifact in artifact_workspace.list_artifacts()):
             artifact_workspace.save_markdown(summary_text)

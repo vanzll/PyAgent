@@ -46,11 +46,25 @@ class AlphaVantageClient:
             "TIME_SERIES_DAILY_ADJUSTED",
             symbol=ticker,
             outputsize="compact",
+            allow_api_notice=True,
         )
-        overview_task = self._request(client, "OVERVIEW", symbol=ticker)
+        overview_task = self._request(client, "OVERVIEW", symbol=ticker, allow_api_notice=True)
         daily_payload, overview_payload = await daily_task, await overview_task
-        if not overview_payload or "Symbol" not in overview_payload:
-            overview_payload = await self._request(client, "ETF_PROFILE", symbol=ticker)
+        if not self._has_price_history(daily_payload):
+            fallback_daily = await self._request(
+                client,
+                "TIME_SERIES_DAILY",
+                symbol=ticker,
+                outputsize="compact",
+                allow_api_notice=True,
+            )
+            if self._has_price_history(fallback_daily):
+                daily_payload = fallback_daily
+            else:
+                daily_payload = await self._request(client, "GLOBAL_QUOTE", symbol=ticker, allow_api_notice=True)
+
+        if not self._has_company_overview(overview_payload):
+            overview_payload = await self._request(client, "ETF_PROFILE", symbol=ticker, allow_api_notice=True)
         return daily_payload, overview_payload
 
     async def _fetch_news(self, client: httpx.AsyncClient, ticker: str) -> list[dict[str, Any]]:
@@ -67,7 +81,7 @@ class AlphaVantageClient:
             for item in feed
         ]
 
-    async def _request(self, client: httpx.AsyncClient, function: str, **params) -> dict[str, Any]:
+    async def _request(self, client: httpx.AsyncClient, function: str, allow_api_notice: bool = False, **params) -> dict[str, Any]:
         response = await client.get(
             self.base_url,
             params={"function": function, "apikey": self.api_key, **params},
@@ -76,11 +90,33 @@ class AlphaVantageClient:
         payload = response.json()
         if "Error Message" in payload:
             raise RuntimeError(payload["Error Message"])
-        if "Note" in payload:
+        if "Note" in payload and not allow_api_notice:
             raise RuntimeError(payload["Note"])
+        if ("Note" in payload or "Information" in payload) and allow_api_notice:
+            return {}
+        if "Information" in payload:
+            raise RuntimeError(payload["Information"])
         return payload
 
     def _parse_price_history(self, payload: dict[str, Any]) -> pd.DataFrame:
+        quote = payload.get("Global Quote", {})
+        if quote:
+            price = self._to_float(quote.get("05. price"))
+            if price is not None:
+                return pd.DataFrame(
+                    [
+                        {
+                            "date": quote.get("07. latest trading day") or "",
+                            "open": price,
+                            "high": price,
+                            "low": price,
+                            "close": price,
+                            "adjusted_close": price,
+                            "volume": self._to_float(quote.get("06. volume")) or 0.0,
+                        }
+                    ]
+                )
+
         series = payload.get("Time Series (Daily)", {})
         rows = []
         for date, values in series.items():
@@ -112,6 +148,12 @@ class AlphaVantageClient:
             "week_52_high": self._to_float(payload.get("52WeekHigh")),
             "week_52_low": self._to_float(payload.get("52WeekLow")),
         }
+
+    def _has_price_history(self, payload: dict[str, Any]) -> bool:
+        return bool(payload.get("Time Series (Daily)") or payload.get("Global Quote"))
+
+    def _has_company_overview(self, payload: dict[str, Any]) -> bool:
+        return bool(payload.get("Symbol") or payload.get("Name") or payload.get("name"))
 
     def _build_market_snapshot(self, profile: dict[str, Any], price_history: pd.DataFrame) -> dict[str, Any]:
         latest_close = None
@@ -325,8 +367,9 @@ class FinancialDataProvider:
             except TypeError:
                 alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker)
             sec_payload = await self.sec_edgar.fetch_company_profile(ticker)
+            profile = self._merge_profile(alpha_payload["profile"], sec_payload, ticker)
             securities[ticker] = {
-                "profile": alpha_payload["profile"],
+                "profile": profile,
                 "market_snapshot": alpha_payload["market_snapshot"],
                 "sec_profile": sec_payload,
             }
@@ -343,6 +386,17 @@ class FinancialDataProvider:
             "macro_series": macro_series,
             "news_items": news_items,
         }
+
+    def _merge_profile(self, profile: dict[str, Any], sec_profile: dict[str, Any], ticker: str) -> dict[str, Any]:
+        merged = dict(profile)
+        company_name = sec_profile.get("company_name")
+        if (not merged.get("name") or merged.get("name") == ticker) and company_name:
+            merged["name"] = company_name
+        if merged.get("sector") in {None, "", "Unknown"} and company_name:
+            upper_name = str(company_name).upper()
+            if "ETF" in upper_name or "TRUST" in upper_name or "FUND" in upper_name:
+                merged["sector"] = "ETF"
+        return merged
 
     def _build_comparison_frame(self, tickers: list[str], securities: dict[str, dict[str, Any]]) -> pd.DataFrame:
         rows = []
