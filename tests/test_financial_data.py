@@ -303,6 +303,52 @@ async def test_alpha_vantage_client_falls_back_when_adjusted_and_overview_are_un
 
 
 @pytest.mark.asyncio
+async def test_alpha_vantage_client_ignores_news_rate_limit_when_core_data_is_available() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        function = request.url.params["function"]
+        if function == "TIME_SERIES_DAILY_ADJUSTED":
+            return httpx.Response(
+                200,
+                json={
+                    "Time Series (Daily)": {
+                        "2026-04-11": {
+                            "1. open": "198.0",
+                            "2. high": "201.0",
+                            "3. low": "197.5",
+                            "4. close": "200.0",
+                            "5. adjusted close": "200.0",
+                            "6. volume": "1200",
+                        }
+                    }
+                },
+            )
+        if function == "OVERVIEW":
+            return httpx.Response(
+                200,
+                json={
+                    "Symbol": "AAPL",
+                    "Name": "Apple Inc.",
+                    "Sector": "Technology",
+                    "MarketCapitalization": "3000000000000",
+                    "PERatio": "31.2",
+                },
+            )
+        if function == "NEWS_SENTIMENT":
+            return httpx.Response(
+                200,
+                json={"Note": "Please consider spreading out your free API requests more sparingly"},
+            )
+        raise AssertionError(f"Unexpected function: {function}")
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://www.alphavantage.co") as client:
+        alpha = AlphaVantageClient(api_key="demo", http_client=client)
+        snapshot = await alpha.fetch_security_snapshot("AAPL", include_news=True)
+
+    assert snapshot["market_snapshot"]["latest_close"] == 200.0
+    assert snapshot["news_items"] == []
+
+
+@pytest.mark.asyncio
 async def test_financial_data_provider_uses_sec_company_name_when_alpha_profile_is_sparse() -> None:
     class FakeAlpha:
         async def fetch_security_snapshot(self, ticker: str, include_news: bool = False):

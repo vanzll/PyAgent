@@ -28,7 +28,10 @@ class AlphaVantageClient:
             daily_payload, overview_payload = await self._fetch_core_payloads(client, ticker)
             news_items = []
             if include_news:
-                news_items = await self._fetch_news(client, ticker)
+                try:
+                    news_items = await self._fetch_news(client, ticker)
+                except Exception:
+                    news_items = []
 
         price_history = self._parse_price_history(daily_payload)
         profile = self._normalize_overview(overview_payload, ticker)
