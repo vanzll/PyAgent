@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import os
 from dataclasses import dataclass
 from typing import Any
@@ -350,10 +351,12 @@ class FinancialDataProvider:
         alpha_vantage: AlphaVantageClient,
         sec_edgar: SecEdgarClient,
         fred: FredClient | None = None,
+        yahoo: "YahooFinanceClient | None" = None,
     ):
         self.alpha_vantage = alpha_vantage
         self.sec_edgar = sec_edgar
         self.fred = fred
+        self.yahoo = yahoo or YahooFinanceClient()
 
     async def build_bundle(self, tickers: list[str], question: str) -> dict[str, Any]:
         include_news = any(keyword in question.lower() for keyword in ["news", "recent", "today", "why", "headline"])
@@ -366,6 +369,9 @@ class FinancialDataProvider:
                 alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker, include_news=include_news)
             except TypeError:
                 alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker)
+            if self._needs_market_fallback(alpha_payload):
+                yahoo_payload = await self.yahoo.fetch_security_snapshot(ticker)
+                alpha_payload = self._merge_security_snapshot(alpha_payload, yahoo_payload)
             sec_payload = await self.sec_edgar.fetch_company_profile(ticker)
             profile = self._merge_profile(alpha_payload["profile"], sec_payload, ticker)
             securities[ticker] = {
@@ -386,6 +392,39 @@ class FinancialDataProvider:
             "macro_series": macro_series,
             "news_items": news_items,
         }
+
+    def _needs_market_fallback(self, payload: dict[str, Any]) -> bool:
+        profile = payload.get("profile", {})
+        market = payload.get("market_snapshot", {})
+        history = payload.get("price_history")
+        history_empty = history is None or getattr(history, "empty", True)
+        return (
+            history_empty
+            or market.get("latest_close") is None
+            or (profile.get("market_cap") is None and profile.get("pe_ratio") is None)
+        )
+
+    def _merge_security_snapshot(self, primary: dict[str, Any], fallback: dict[str, Any]) -> dict[str, Any]:
+        merged = {
+            "ticker": primary.get("ticker") or fallback.get("ticker"),
+            "profile": dict(primary.get("profile", {})),
+            "market_snapshot": dict(primary.get("market_snapshot", {})),
+            "price_history": primary.get("price_history"),
+            "news_items": primary.get("news_items", []) or fallback.get("news_items", []),
+        }
+        fallback_profile = fallback.get("profile", {})
+        for key, value in fallback_profile.items():
+            if merged["profile"].get(key) in {None, "", "Unknown"} and value not in {None, ""}:
+                merged["profile"][key] = value
+
+        fallback_market = fallback.get("market_snapshot", {})
+        for key, value in fallback_market.items():
+            if merged["market_snapshot"].get(key) is None and value is not None:
+                merged["market_snapshot"][key] = value
+
+        if merged["price_history"] is None or getattr(merged["price_history"], "empty", True):
+            merged["price_history"] = fallback.get("price_history")
+        return merged
 
     def _merge_profile(self, profile: dict[str, Any], sec_profile: dict[str, Any], ticker: str) -> dict[str, Any]:
         merged = dict(profile)
@@ -422,6 +461,88 @@ class FinancialDataProvider:
             )
         return pd.DataFrame(rows)
 
+
+class YahooFinanceClient:
+    async def fetch_security_snapshot(self, ticker: str) -> dict[str, Any]:
+        return await asyncio.to_thread(self._fetch_sync, ticker)
+
+    def _fetch_sync(self, ticker: str) -> dict[str, Any]:
+        try:
+            import yfinance as yf
+        except ImportError:
+            return {
+                "ticker": ticker,
+                "profile": {"ticker": ticker, "name": ticker, "sector": "Unknown", "description": "", "market_cap": None, "pe_ratio": None, "week_52_high": None, "week_52_low": None},
+                "market_snapshot": {"latest_close": None, "market_cap": None, "pe_ratio": None, "week_52_high": None, "week_52_low": None},
+                "price_history": pd.DataFrame(columns=["date", "open", "high", "low", "close", "adjusted_close", "volume"]),
+                "news_items": [],
+            }
+
+        asset = yf.Ticker(ticker)
+        history = asset.history(period="6mo", interval="1d", auto_adjust=False)
+        history_frame = self._normalize_history(history)
+        info = getattr(asset, "info", {}) or {}
+        fast_info = getattr(asset, "fast_info", {}) or {}
+        latest_close = self._coalesce(
+            fast_info.get("lastPrice"),
+            info.get("currentPrice"),
+            None if history_frame.empty else history_frame.iloc[-1]["adjusted_close"],
+        )
+        return {
+            "ticker": ticker,
+            "profile": {
+                "ticker": ticker,
+                "name": info.get("longName") or info.get("shortName") or ticker,
+                "sector": info.get("sector") or info.get("quoteType") or "Unknown",
+                "description": info.get("longBusinessSummary") or "",
+                "market_cap": self._to_float(self._coalesce(fast_info.get("marketCap"), info.get("marketCap"))),
+                "pe_ratio": self._to_float(info.get("trailingPE")),
+                "week_52_high": self._to_float(self._coalesce(info.get("fiftyTwoWeekHigh"), fast_info.get("yearHigh"))),
+                "week_52_low": self._to_float(self._coalesce(info.get("fiftyTwoWeekLow"), fast_info.get("yearLow"))),
+            },
+            "market_snapshot": {
+                "latest_close": self._to_float(latest_close),
+                "market_cap": self._to_float(self._coalesce(fast_info.get("marketCap"), info.get("marketCap"))),
+                "pe_ratio": self._to_float(info.get("trailingPE")),
+                "week_52_high": self._to_float(self._coalesce(info.get("fiftyTwoWeekHigh"), fast_info.get("yearHigh"))),
+                "week_52_low": self._to_float(self._coalesce(info.get("fiftyTwoWeekLow"), fast_info.get("yearLow"))),
+            },
+            "price_history": history_frame,
+            "news_items": [],
+        }
+
+    def _normalize_history(self, history: pd.DataFrame) -> pd.DataFrame:
+        if history is None or history.empty:
+            return pd.DataFrame(columns=["date", "open", "high", "low", "close", "adjusted_close", "volume"])
+        frame = history.reset_index().rename(
+            columns={
+                "Date": "date",
+                "Open": "open",
+                "High": "high",
+                "Low": "low",
+                "Close": "close",
+                "Adj Close": "adjusted_close",
+                "Volume": "volume",
+            }
+        )
+        if "adjusted_close" not in frame.columns:
+            frame["adjusted_close"] = frame["close"]
+        frame["date"] = frame["date"].astype(str).str[:10]
+        return frame[["date", "open", "high", "low", "close", "adjusted_close", "volume"]]
+
+    def _coalesce(self, *values):
+        for value in values:
+            if value not in (None, "", "None"):
+                return value
+        return None
+
+    def _to_float(self, value: Any) -> float | None:
+        if value in (None, "", "None"):
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
 
 @dataclass
 class _BorrowedAsyncClient:

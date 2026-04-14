@@ -49,6 +49,7 @@ webapp = [
     "pdfplumber>=0.11.5",
     "python-multipart>=0.0.20",
     "uvicorn>=0.34.0",
+    "yfinance>=0.2.66",
 ]
 
 all = [
@@ -63,6 +64,7 @@ all = [
     "pdfplumber>=0.11.5",
     "python-multipart>=0.0.20",
     "uvicorn>=0.34.0",
+    "yfinance>=0.2.66",
 ]
 ipykernel = [
     "dill>=0.4.1",
@@ -93,4 +95,5 @@ dev = [
     "pdfplumber>=0.11.5",
     "python-multipart>=0.0.20",
     "uvicorn>=0.34.0",
+    "yfinance>=0.2.66",
 ]

@@ -350,6 +350,79 @@ async def test_financial_data_provider_uses_sec_company_name_when_alpha_profile_
 
 
 @pytest.mark.asyncio
+async def test_financial_data_provider_uses_secondary_market_source_when_alpha_is_sparse() -> None:
+    class FakeAlpha:
+        async def fetch_security_snapshot(self, ticker: str, include_news: bool = False):
+            return {
+                "ticker": ticker,
+                "profile": {
+                    "name": ticker,
+                    "sector": "Unknown",
+                    "description": "",
+                    "market_cap": None,
+                    "pe_ratio": None,
+                    "week_52_high": None,
+                    "week_52_low": None,
+                },
+                "market_snapshot": {
+                    "latest_close": None,
+                    "market_cap": None,
+                    "pe_ratio": None,
+                    "week_52_high": None,
+                    "week_52_low": None,
+                },
+                "price_history": pd.DataFrame(columns=["date", "open", "high", "low", "close", "adjusted_close", "volume"]),
+                "news_items": [],
+            }
+
+    class FakeYahoo:
+        async def fetch_security_snapshot(self, ticker: str):
+            return {
+                "ticker": ticker,
+                "profile": {
+                    "name": "Apple Inc.",
+                    "sector": "Technology",
+                    "description": "Devices and services company.",
+                    "market_cap": 3000000000000.0,
+                    "pe_ratio": 31.2,
+                    "week_52_high": 205.0,
+                    "week_52_low": 164.0,
+                },
+                "market_snapshot": {
+                    "latest_close": 200.0,
+                    "market_cap": 3000000000000.0,
+                    "pe_ratio": 31.2,
+                    "week_52_high": 205.0,
+                    "week_52_low": 164.0,
+                },
+                "price_history": pd.DataFrame(
+                    [
+                        {"date": "2026-04-10", "open": 198.0, "high": 201.0, "low": 197.0, "close": 200.0, "adjusted_close": 200.0, "volume": 1000}
+                    ]
+                ),
+                "news_items": [],
+            }
+
+    class FakeSec:
+        async def fetch_company_profile(self, ticker: str):
+            return {
+                "ticker": ticker,
+                "company_name": "Apple Inc.",
+                "cik": "0000320193",
+                "recent_filings": [{"form": "10-Q", "filing_date": "2026-02-01"}],
+                "company_facts": {"latest_revenue": 1000, "latest_net_income": 200},
+            }
+
+    provider = FinancialDataProvider(alpha_vantage=FakeAlpha(), sec_edgar=FakeSec(), fred=None, yahoo=FakeYahoo())
+    bundle = await provider.build_bundle(["AAPL"], "Summarize Apple")
+
+    security = bundle["securities"]["AAPL"]
+    assert security["market_snapshot"]["latest_close"] == 200.0
+    assert not bundle["price_history"]["AAPL"].empty
+    assert security["profile"]["sector"] == "Technology"
+
+
+@pytest.mark.asyncio
 async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
     monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")
