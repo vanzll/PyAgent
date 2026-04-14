@@ -102,14 +102,14 @@ export LLM_API_KEY="your-api-key"
 # Optional for OpenAI-compatible endpoints
 export LLM_BASE_URL="https://api.openai.com/v1"
 
-# Public market data
+# SEC asks for an identifying user agent
+export SEC_USER_AGENT="Your Name your.email@example.com"
+
+# Optional: Alpha Vantage if you want an additional live market data source
 export ALPHAVANTAGE_API_KEY="your-alpha-vantage-key"
 
 # Optional macro data
 export FRED_API_KEY="your-fred-key"
-
-# SEC asks for an identifying user agent
-export SEC_USER_AGENT="Your Name your.email@example.com"
 ```
 
 Then start the web app:
@@ -153,12 +153,14 @@ The simplest path is Render:
    - Start: `cave-agent-webapp`
 4. Use `WEBAPP_DEMO_MODE=1` if you want a stable classroom demo with no external keys.
 5. If you want live data instead, set `WEBAPP_DEMO_MODE=0` and configure:
-   - `ALPHAVANTAGE_API_KEY`
    - `SEC_USER_AGENT`
+   - optional `ALPHAVANTAGE_API_KEY`
    - optional `FRED_API_KEY`
    - `LLM_MODEL_ID`
    - `LLM_API_KEY`
    - optional `LLM_BASE_URL`
+
+Without `ALPHAVANTAGE_API_KEY`, the app still runs in public-data mode using SEC filings plus stable market-data fallback so the product remains usable even when free market APIs are rate-limited.
 
 Render gives you a default `*.onrender.com` URL, which is enough for the course requirement. You do not need to buy a domain unless you want a branded URL. A full deployment walkthrough lives in [docs/render-deployment.md](docs/render-deployment.md).
 

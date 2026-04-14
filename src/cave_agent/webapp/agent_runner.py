@@ -267,9 +267,7 @@ class FinancialResearchRunner:
 
     def _should_use_demo_provider(self) -> bool:
         demo_mode = os.getenv("WEBAPP_DEMO_MODE", "").strip().lower()
-        if demo_mode in {"1", "true", "yes", "on"}:
-            return True
-        return not os.getenv("ALPHAVANTAGE_API_KEY") and not os.getenv("ALPHA_VANTAGE_API_KEY")
+        return demo_mode in {"1", "true", "yes", "on"}
 
     def _build_demo_summary(self, research_bundle: dict[str, Any], prompt: str) -> str:
         frame = research_bundle["comparison_frame"]

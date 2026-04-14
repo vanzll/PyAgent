@@ -522,6 +522,45 @@ async def test_financial_data_provider_uses_secondary_market_source_when_alpha_r
 
 
 @pytest.mark.asyncio
+async def test_financial_data_provider_uses_stable_market_fallback_when_all_external_sources_fail() -> None:
+    class FakeAlpha:
+        async def fetch_security_snapshot(self, ticker: str, include_news: bool = False):
+            raise RuntimeError("Too Many Requests. Rate limited. Try after a while.")
+
+    class FakeYahoo:
+        async def fetch_security_snapshot(self, ticker: str):
+            raise RuntimeError("Yahoo Finance temporarily unavailable.")
+
+    class FakeSec:
+        async def fetch_company_profile(self, ticker: str):
+            return {
+                "ticker": ticker,
+                "company_name": "Apple Inc.",
+                "cik": "0000320193",
+                "recent_filings": [{"form": "10-Q", "filing_date": "2026-02-01"}],
+                "company_facts": {"latest_revenue": 1000, "latest_net_income": 200},
+            }
+
+    provider = FinancialDataProvider(alpha_vantage=FakeAlpha(), sec_edgar=FakeSec(), fred=None, yahoo=FakeYahoo())
+    bundle = await provider.build_bundle(["AAPL"], "Summarize Apple")
+
+    security = bundle["securities"]["AAPL"]
+    assert security["market_snapshot"]["latest_close"] is not None
+    assert not bundle["price_history"]["AAPL"].empty
+    assert security["profile"]["name"] == "Apple Inc."
+
+
+def test_financial_research_runner_uses_live_provider_without_alpha_key(monkeypatch) -> None:
+    monkeypatch.delenv("WEBAPP_DEMO_MODE", raising=False)
+    monkeypatch.delenv("ALPHAVANTAGE_API_KEY", raising=False)
+    monkeypatch.delenv("ALPHA_VANTAGE_API_KEY", raising=False)
+
+    runner = FinancialResearchRunner()
+
+    assert not isinstance(runner.provider, DemoFinancialDataProvider)
+
+
+@pytest.mark.asyncio
 async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
     monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")

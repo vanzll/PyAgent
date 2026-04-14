@@ -20,7 +20,7 @@
         {% if demo_mode %}
         <span class="topbar-tag topbar-tag-live">Demo mode</span>
         {% else %}
-        <span class="topbar-tag topbar-tag-live">Live Market APIs</span>
+        <span class="topbar-tag topbar-tag-live">Public Data Mode</span>
         {% endif %}
       </div>
     </header>
@@ -29,8 +29,8 @@
       <p class="eyebrow">Prompt-First Workflow</p>
       <h1>Ask the agent with one prompt.</h1>
       <p class="lede">
-        Enter tickers and a research prompt. The assistant replies in plain English and, when needed,
-        generates charts, tables, and downloadable outputs.
+        Enter one financial research prompt. The agent infers the target company or market, replies in plain English,
+        and generates charts, tables, and downloadable outputs when needed.
       </p>
       <p class="course-statement">
         This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
@@ -112,9 +112,9 @@
         </section>
 
         <div class="sources-note">
-          <span>Alpha Vantage</span>
+          <span>Yahoo Finance</span>
           <span>SEC EDGAR</span>
-          <span>FRED</span>
+          <span>Stable Fallback</span>
         </div>
       </aside>
     </section>

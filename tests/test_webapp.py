@@ -151,7 +151,7 @@ def test_webapp_chat_session_lifecycle_and_artifact_download(tmp_path: Path) -> 
     assert "Prompt" in response.text
     assert "Tickers" not in response.text
     assert "NUS CS5260" in response.text
-    assert "Alpha Vantage" in response.text
+    assert "Yahoo Finance" in response.text
     assert "SEC EDGAR" in response.text
     assert "Results" in response.text
 
@@ -191,6 +191,21 @@ def test_webapp_chat_session_lifecycle_and_artifact_download(tmp_path: Path) -> 
     download_response = client.get(f"/api/runs/{run_id}/artifacts/comparison.csv")
     assert download_response.status_code == 200
     assert "ticker,latest_close" in download_response.text
+
+
+def test_webapp_homepage_defaults_to_public_data_mode_without_alpha_key(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.delenv("WEBAPP_DEMO_MODE", raising=False)
+    monkeypatch.delenv("ALPHAVANTAGE_API_KEY", raising=False)
+    monkeypatch.delenv("ALPHA_VANTAGE_API_KEY", raising=False)
+
+    service = RunService(storage_root=tmp_path, runner=FakeRunner())
+    client = TestClient(create_app(service))
+
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert "Public Data Mode" in response.text
+    assert "Demo mode" not in response.text
 
 
 def test_webapp_preserves_multi_turn_session_context(tmp_path: Path) -> None:

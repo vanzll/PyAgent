@@ -26,9 +26,7 @@ def create_app(service: RunService | None = None) -> FastAPI:
 
     @app.get("/", response_class=HTMLResponse)
     async def index(request: Request):
-        demo_mode = os.getenv("WEBAPP_DEMO_MODE", "").strip().lower() in {"1", "true", "yes", "on"} or not (
-            os.getenv("ALPHAVANTAGE_API_KEY") or os.getenv("ALPHA_VANTAGE_API_KEY")
-        )
+        demo_mode = os.getenv("WEBAPP_DEMO_MODE", "").strip().lower() in {"1", "true", "yes", "on"}
         return templates.TemplateResponse(
             request=request,
             name="index.html",
