@@ -368,11 +368,26 @@ class FinancialDataProvider:
         news_items: dict[str, list[dict[str, Any]]] = {}
 
         for ticker in tickers:
+            alpha_payload: dict[str, Any] | None = None
+            alpha_error: Exception | None = None
             try:
                 alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker, include_news=include_news)
             except TypeError:
-                alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker)
-            if self._needs_market_fallback(alpha_payload):
+                try:
+                    alpha_payload = await self.alpha_vantage.fetch_security_snapshot(ticker)
+                except Exception as exc:  # pragma: no cover - exercised via provider-level fallback test
+                    alpha_error = exc
+            except Exception as exc:
+                alpha_error = exc
+
+            if alpha_payload is None:
+                try:
+                    alpha_payload = await self.yahoo.fetch_security_snapshot(ticker)
+                except Exception:
+                    if alpha_error is not None:
+                        raise alpha_error
+                    raise
+            elif self._needs_market_fallback(alpha_payload):
                 yahoo_payload = await self.yahoo.fetch_security_snapshot(ticker)
                 alpha_payload = self._merge_security_snapshot(alpha_payload, yahoo_payload)
             sec_payload = await self.sec_edgar.fetch_company_profile(ticker)
