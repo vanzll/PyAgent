@@ -131,6 +131,17 @@ class NaNRunner:
         )
 
 
+class MixedRunner:
+    async def run(self, prompt: str, bundle: ParsedInputBundle, workspace: Path, emit) -> RunResult:
+        emit("status", {"message": "mixed runner started"})
+        if bundle.tickers:
+            return RunResult(
+                summary_text=f"Financial answer for {', '.join(bundle.tickers)}",
+                snapshot_cards=[{"ticker": bundle.tickers[0], "name": bundle.tickers[0], "sector": "Tech"}],
+            )
+        return RunResult(summary_text="Hello. I can answer general questions and also help with stock research.")
+
+
 def test_run_service_normalizes_tickers_without_files(tmp_path: Path) -> None:
     service = RunService(storage_root=tmp_path, runner=FakeRunner())
     bundle = service.build_bundle("amd, nvda")
@@ -313,8 +324,72 @@ def test_webapp_returns_prompt_inference_error_as_bad_request(tmp_path: Path) ->
     session_id = client.post("/api/sessions").json()["session_id"]
     response = client.post(
         f"/api/sessions/{session_id}/messages",
-        data={"prompt": "hello"},
+        data={"prompt": "Analyze company valuation and earnings."},
     )
 
     assert response.status_code == 400
     assert response.json()["detail"] == "Could not infer a company, ETF, or market proxy from the prompt."
+
+
+def test_webapp_generic_chat_prompt_succeeds_without_finance_target(tmp_path: Path) -> None:
+    service = RunService(storage_root=tmp_path, runner=MixedRunner())
+    client = TestClient(create_app(service))
+
+    session_id = client.post("/api/sessions").json()["session_id"]
+    response = client.post(
+        f"/api/sessions/{session_id}/messages",
+        data={"prompt": "hello"},
+    )
+
+    assert response.status_code == 202
+
+    payload = None
+    for _ in range(50):
+        payload = client.get(f"/api/sessions/{session_id}").json()
+        if payload["status"] == "completed":
+            break
+        time.sleep(0.01)
+
+    assert payload is not None
+    assert payload["status"] == "completed"
+    assert payload["messages"][0]["content"] == "hello"
+    assert payload["messages"][0]["tickers"] == []
+    assert payload["messages"][1]["role"] == "assistant"
+    assert "general questions" in payload["messages"][1]["content"].lower()
+    assert payload["messages"][1]["tickers"] == []
+
+
+def test_webapp_generic_chat_does_not_inherit_previous_finance_tickers(tmp_path: Path) -> None:
+    service = RunService(storage_root=tmp_path, runner=MixedRunner())
+    client = TestClient(create_app(service))
+
+    session_id = client.post("/api/sessions").json()["session_id"]
+    first_run_id = client.post(
+        f"/api/sessions/{session_id}/messages",
+        data={"prompt": "Compare AMD and NVDA on valuation"},
+    ).json()["run_id"]
+
+    for _ in range(50):
+        payload = client.get(f"/api/sessions/{session_id}").json()
+        if payload["status"] == "completed" and payload["run_id"] == first_run_id:
+            break
+        time.sleep(0.01)
+
+    second_run_id = client.post(
+        f"/api/sessions/{session_id}/messages",
+        data={"prompt": "hello"},
+    ).json()["run_id"]
+
+    final_payload = None
+    for _ in range(50):
+        final_payload = client.get(f"/api/sessions/{session_id}").json()
+        if final_payload["status"] == "completed" and final_payload["run_id"] == second_run_id:
+            break
+        time.sleep(0.01)
+
+    assert final_payload is not None
+    assert final_payload["status"] == "completed"
+    assert final_payload["tickers"] == ["AMD", "NVDA"]
+    assert final_payload["messages"][2]["content"] == "hello"
+    assert final_payload["messages"][2]["tickers"] == []
+    assert final_payload["messages"][3]["tickers"] == []

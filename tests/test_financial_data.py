@@ -615,6 +615,24 @@ def test_financial_research_runner_demo_summary_tolerates_missing_numeric_values
 
 
 @pytest.mark.asyncio
+async def test_financial_research_runner_handles_generic_chat_without_tickers(tmp_path, monkeypatch) -> None:
+    monkeypatch.delenv("LLM_MODEL_ID", raising=False)
+    monkeypatch.delenv("WEBAPP_DEMO_MODE", raising=False)
+
+    runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
+    result = await runner.run(
+        "hello",
+        ParsedInputBundle(tickers=[]),
+        tmp_path,
+        lambda *_args, **_kwargs: None,
+    )
+
+    assert "I can help" in result.summary_text
+    assert result.artifacts == []
+    assert result.snapshot_cards == []
+
+
+@pytest.mark.asyncio
 async def test_financial_research_runner_timeout_clears_partial_outputs(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("WEBAPP_DEMO_MODE", "1")
     monkeypatch.setenv("LLM_MODEL_ID", "gpt-5.4")

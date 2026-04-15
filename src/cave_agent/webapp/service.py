@@ -102,6 +102,45 @@ class RunService:
         "VS",
         "WHAT",
     }
+    FINANCE_KEYWORDS = {
+        "alpha",
+        "balance sheet",
+        "bull",
+        "company",
+        "compare",
+        "earnings",
+        "equity",
+        "etf",
+        "filing",
+        "filings",
+        "finance",
+        "financial",
+        "fund",
+        "fundamental",
+        "fundamentals",
+        "growth",
+        "market",
+        "market cap",
+        "net income",
+        "p/e",
+        "pe ratio",
+        "performance",
+        "price",
+        "prices",
+        "quarter",
+        "quarters",
+        "research",
+        "revenue",
+        "risk",
+        "sector",
+        "snapshot",
+        "stock",
+        "stocks",
+        "ticker",
+        "trend",
+        "valuation",
+        "yield",
+    }
 
     def __init__(self, storage_root: Path, runner: RunnerProtocol):
         self.storage_root = Path(storage_root)
@@ -150,10 +189,11 @@ class RunService:
     ) -> RunRecord:
         session = self.get_session(session_id)
         normalized_tickers = self._resolve_tickers(prompt, tickers, session.tickers)
-        if not normalized_tickers:
+        if not normalized_tickers and self._is_finance_prompt(prompt):
             raise RuntimeError("Could not infer a company, ETF, or market proxy from the prompt.")
 
-        session.tickers = normalized_tickers
+        if normalized_tickers:
+            session.tickers = normalized_tickers
         user_message = ChatMessageRecord(role="user", content=prompt, tickers=list(normalized_tickers))
         session.messages.append(user_message)
         self._append_session_event(session, "user", {"role": "user", "content": prompt})
@@ -263,6 +303,7 @@ class RunService:
 
     async def _execute_run(self, record: RunRecord, saved_files: list[InputFileRecord]) -> None:
         try:
+            run_label = "Running general assistant" if not record.tickers else "Running financial research agent"
             record.status = "parsing"
             self._append_run_event(record, "status", {"message": "Preparing research inputs", "status": "parsing"})
             bundle = self._parse_file_records(saved_files) if saved_files else ParsedInputBundle()
@@ -270,7 +311,7 @@ class RunService:
             record.input_files = bundle.input_files
 
             record.status = "running"
-            self._append_run_event(record, "status", {"message": "Running financial research agent", "status": "running"})
+            self._append_run_event(record, "status", {"message": run_label, "status": "running"})
             result = await self.runner.run(
                 record.prompt,
                 bundle,
@@ -293,6 +334,7 @@ class RunService:
         saved_files: list[InputFileRecord],
     ) -> None:
         try:
+            run_label = "Running general assistant" if not record.tickers else "Running financial research agent"
             record.status = "parsing"
             session.status = "parsing"
             self._append_run_event(record, "status", {"message": "Preparing research inputs", "status": "parsing"})
@@ -304,8 +346,8 @@ class RunService:
 
             record.status = "running"
             session.status = "running"
-            self._append_run_event(record, "status", {"message": "Running financial research agent", "status": "running"})
-            self._append_session_event(session, "status", {"message": "Running financial research agent", "status": "running", "run_id": record.run_id})
+            self._append_run_event(record, "status", {"message": run_label, "status": "running"})
+            self._append_session_event(session, "status", {"message": run_label, "status": "running", "run_id": record.run_id})
 
             result = await self.runner.run(
                 record.prompt,
@@ -491,7 +533,32 @@ class RunService:
         if inferred:
             return inferred
 
-        if fallback_tickers:
+        if self._is_market_context_prompt(prompt):
+            return ["SPY"]
+
+        if fallback_tickers and self._is_finance_prompt(prompt):
             return self._normalize_tickers(fallback_tickers)
 
         return []
+
+    def _is_finance_prompt(self, prompt: str) -> bool:
+        lowered = prompt.lower()
+        if self.infer_tickers_from_prompt(prompt):
+            return True
+        return any(keyword in lowered for keyword in self.FINANCE_KEYWORDS)
+
+    def _is_market_context_prompt(self, prompt: str) -> bool:
+        lowered = prompt.lower()
+        return any(
+            phrase in lowered
+            for phrase in {
+                "market snapshot",
+                "stock market",
+                "equity market",
+                "us market",
+                "u.s. market",
+                "market risk",
+                "analyze the market",
+                "analyse the market",
+            }
+        )

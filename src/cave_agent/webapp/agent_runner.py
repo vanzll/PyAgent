@@ -81,7 +81,7 @@ class FinancialResearchRunner:
 
     async def run(self, prompt: str, bundle: ParsedInputBundle, workspace: Path, emit) -> RunResult:
         if not bundle.tickers:
-            raise RuntimeError("At least one ticker is required.")
+            return await self._run_generic_chat(prompt, emit)
 
         outputs_dir = workspace / "outputs"
         artifact_workspace = ArtifactWorkspace(outputs_dir)
@@ -162,6 +162,33 @@ class FinancialResearchRunner:
             preview_tables=artifact_workspace.preview_tables,
             preview_charts=artifact_workspace.preview_charts,
         )
+
+    async def _run_generic_chat(self, prompt: str, emit) -> RunResult:
+        emit("status", {"message": "Running general assistant"})
+        if not os.getenv("LLM_MODEL_ID"):
+            return RunResult(summary_text=self._build_generic_fallback(prompt))
+
+        runtime = IPythonRuntime(variables=[Variable("answer_text", "", "Write the final assistant answer here.")])
+        agent = CaveAgent(
+            model=self._build_model(),
+            runtime=runtime,
+            instructions=(
+                "You are a concise general assistant inside a financial research product. "
+                "If the user asks a non-financial question, answer it normally. "
+                "If appropriate, briefly mention that you can also help with stock research, ETF comparison, and market snapshots. "
+                "Write the final response into answer_text."
+            ),
+            max_steps=6,
+            max_exec_output=8000,
+            display=False,
+        )
+        timeout_seconds = float(os.getenv("WEBAPP_AGENT_TIMEOUT_SECONDS", "20"))
+        try:
+            response = await asyncio.wait_for(agent.run(prompt), timeout=timeout_seconds)
+            answer_text = await runtime.retrieve("answer_text")
+            return RunResult(summary_text=answer_text or response.content)
+        except Exception:
+            return RunResult(summary_text=self._build_generic_fallback(prompt))
 
     async def _run_agent_with_fallback(
         self,
@@ -289,6 +316,18 @@ class FinancialResearchRunner:
         lines.append("")
         lines.append("For research use only. Not investment advice.")
         return "\n".join(lines)
+
+    def _build_generic_fallback(self, prompt: str) -> str:
+        lowered = prompt.strip().lower()
+        if lowered in {"hello", "hi", "hey"}:
+            return (
+                "Hello. I can help with general questions and also help with stock research, "
+                "ETF comparison, and market snapshots. Try asking about Apple, Nvidia, or SPY."
+            )
+        return (
+            "I can help with general questions and also help with stock research, ETF comparison, "
+            "and market snapshots. For financial analysis, mention a company, ticker, ETF, or market topic."
+        )
 
     def _format_large_number(self, value: float | None) -> str:
         if value is None or pd.isna(value):
