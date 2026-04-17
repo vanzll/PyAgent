@@ -1,100 +1,84 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://github.com/acodercat/cave-agent/raw/master/assets/logo-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://github.com/acodercat/cave-agent/raw/master/assets/logo-light.svg">
-    <img src="https://github.com/acodercat/cave-agent/raw/master/assets/logo-light.svg" alt="CaveAgent" width="50%">
-  </picture>
-</p>
-
-<h3 align="center">
-  <b>CaveAgent: Transforming LLMs into Stateful Runtime Operators </b>
-</h3>
+# PyCallingAgent
 
 <p align="center">
-  <a href="https://caveagent.dev"><img src="https://img.shields.io/badge/-Website-brightgreen?style=flat-square&logo=googlechrome&logoColor=white" alt="Website"></a>
-  <a href="https://arxiv.org/abs/2601.01569"><img src="https://img.shields.io/badge/arXiv-Paper-red?style=flat-square&logo=arxiv" alt="arXiv Paper"></a>
+  <a href="#"><img src="https://img.shields.io/badge/NUS-CS5260%20Final%20Project-003D7C?style=flat-square" alt="NUS CS5260 Final Project"></a>
+  <a href="https://pycallingagent.onrender.com"><img src="https://img.shields.io/badge/Live%20Demo-pycallingagent.onrender.com-2ea44f?style=flat-square" alt="Live Demo"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square" alt="License: MIT"></a>
-  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.12+-blue?style=flat-square" alt="Python 3.12+"></a>
-  <a href="https://pypi.org/project/cave-agent"><img src="https://img.shields.io/badge/PyPI-0.7.3-blue?style=flat-square" alt="PyPI version"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square" alt="Python 3.10+"></a>
 </p>
 
-<p align="center">
-  <em>"From text-in-text-out to (text&amp;object)-in-(text&amp;object)-out"</em>
-</p>
+> **NUS CS5260 — Neural Networks: Foundations to Applications**
+> Final project submission. This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+> **Research-only demonstration. Not investment advice.**
 
 ---
 
-Most LLM agents operate under a text-in-text-out paradigm, with tool interactions constrained to JSON primitives. CaveAgent breaks this with **Stateful Runtime Management**—a persistent Python runtime with direct **variable injection and retrieval**:
+## About
 
-- **Inject** any Python object into the runtime—DataFrames, models, database connections, custom class instances—as first-class variables the LLM can manipulate
-- **Persist** state across turns without serialization; objects live in the runtime, not in the context window
-- **Retrieve** manipulated objects back as native Python types for downstream
+**PyCallingAgent** is a prompt-first financial research agent built on top of a persistent Python runtime. A user types one natural-language question; the agent infers the target (e.g. `AAPL`, `NVDA`, `SPY`), pulls grounded data from SEC EDGAR and public market sources, runs Python code inside a live runtime, and returns a written answer together with charts, tables, and a downloadable report — all on a single page.
 
+The project is packaged as a deployable web app with a FastAPI backend and a lightweight browser UI. A public instance is live at **[pycallingagent.onrender.com](https://pycallingagent.onrender.com)**.
 
-https://github.com/user-attachments/assets/0e4a23b0-1afb-4408-8d87-ae1e13388aae
+### What it is
+
+- A **financial research agent** that returns language answers **and** visible work products (chart + table + report) in one turn.
+- A **deployable product**: FastAPI service, session/run orchestration, artifact download, and a simple web frontend.
+- A **course deliverable** for NUS CS5260, built around the idea that an LLM should drive a live Python process instead of reasoning about text snapshots of one.
+
+### What it is not
+
+- Not a general-purpose agent framework. The underlying agent core is provided by the [CaveAgent](https://github.com/acodercat/cave-agent) open-source library; this repository adds the financial research pipeline and the web application on top.
+- Not a financial advisory product. All outputs are generated for coursework and demonstration.
+
+---
+
+## Quick Look
+
+- **Live demo:** https://pycallingagent.onrender.com
+- **Try prompts such as:**
+  - `Summarize Apple and show the recent price trend.`
+  - `Compare AMD and Nvidia on valuation and performance.`
+  - `Give me a market snapshot for SPY and highlight the risks.`
+
+Non-financial prompts (e.g. `hello`) fall through to generic chat, so the app does not error on small talk.
+
+---
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Financial Research Agent](#financial-research-agent)
-- [Hello World](#hello-world)
-- [Runtimes](#runtimes)
-- [Examples](#examples)
-  - [Data Visualization](#data-visualization)
-  - [Function Calling](#function-calling)
-  - [Stateful Object Interactions](#stateful-object-interactions)
-  - [Multi-Agent Coordination](#multi-agent-coordination)
-  - [Real-time Streaming](#real-time-streaming)
-  - [Security Rules](#security-rules)
-- [Agent Skills](#agent-skills)
-  - [Creating a Skill](#creating-a-skill)
-  - [How Skills Load](#how-skills-load-progressive-disclosure)
-  - [Using Skills](#using-skills)
-  - [Injection Module](#injection-module-caveagent-extension)
-- [Context Compaction](#context-compaction)
-- [API Resilience](#api-resilience)
-- [Features](#features)
-- [Configuration](#configuration)
-- [LLM Provider Support](#llm-provider-support)
+- [Getting Started](#getting-started)
+- [Run the Web App Locally](#run-the-web-app-locally)
+- [Deploy Your Own Public Instance](#deploy-your-own-public-instance)
+- [Repository Layout](#repository-layout)
+- [Architecture Overview](#architecture-overview)
+- [Underlying Agent Core](#underlying-agent-core)
+- [Acknowledgements](#acknowledgements)
+- [License](#license)
 
-## Installation
+---
+
+## Getting Started
+
+### Requirements
+
+- Python 3.10 or newer
+- An LLM endpoint that speaks the OpenAI-compatible API (any provider works)
+- Optional: an SEC-compliant user agent string if you want to query SEC EDGAR
+- Optional: an Alpha Vantage API key for live market data
+
+### Install
 
 ```bash
-pip install 'cave-agent[all]'
+git clone https://github.com/vanzll/PyAgent.git
+cd PyAgent
+pip install -e '.[openai,webapp]'
 ```
 
-Choose your installation:
+---
 
-```bash
-# OpenAI support
-pip install 'cave-agent[openai]'
+## Run the Web App Locally
 
-# 100+ LLM providers via LiteLLM
-pip install 'cave-agent[litellm]'
-
-# Process-isolated kernel runtime (IPyKernelRuntime)
-pip install 'cave-agent[ipykernel]'
-
-# Financial research web app
-pip install 'cave-agent[openai,webapp]'
-```
-
-## Financial Research Agent
-
-CaveAgent now includes a single-process FastAPI chat workspace for public-market research. The app accepts one or more U.S. equity or ETF tickers, keeps a multi-turn conversation history, and lets an agent reply in chat while generating charts, comparison tables, and a short research brief in a live workspace.
-
-### What It Does
-
-- Enter one or more tickers such as `AAPL`, `NVDA`, or `SPY`
-- Ask follow-up research questions in plain English inside a persistent chat session
-- Stream run status back to the browser while the conversation continues
-- View generated comparison tables, charts, and markdown summaries beside the chat thread
-- Download generated comparison tables, charts, and markdown summaries
-- Mark every output as research-only, not investment advice
-
-### Run It Locally
-
-Set your model and data-source environment first:
+Set the environment variables required by the app:
 
 ```bash
 export LLM_MODEL_ID="your-model"
@@ -102,17 +86,14 @@ export LLM_API_KEY="your-api-key"
 # Optional for OpenAI-compatible endpoints
 export LLM_BASE_URL="https://api.openai.com/v1"
 
-# SEC asks for an identifying user agent
+# SEC requires an identifying user agent
 export SEC_USER_AGENT="Your Name your.email@example.com"
 
-# Optional: Alpha Vantage if you want an additional live market data source
+# Optional: Alpha Vantage for live market data
 export ALPHAVANTAGE_API_KEY="your-alpha-vantage-key"
-
-# Optional macro data
-export FRED_API_KEY="your-fred-key"
 ```
 
-Then start the web app:
+Start the web app:
 
 ```bash
 cave-agent-webapp
@@ -120,70 +101,99 @@ cave-agent-webapp
 
 Open `http://localhost:8000` in your browser.
 
-### Deterministic Demo Mode
+Without `ALPHAVANTAGE_API_KEY`, the app runs in **public-data mode** — it still serves SEC filings plus a stable market-data fallback, which keeps the demo usable when free market APIs are rate-limited.
 
-For classroom demos, you can run the app without live market or model credentials:
+### Classroom Demo Mode
+
+A deterministic demo mode is included for classroom presentations. It skips live credentials and serves built-in sample data for `AAPL`, `AMD`, `NVDA`, and `SPY`:
 
 ```bash
 bash examples/run_financial_research_demo.sh
 ```
 
-This enables `WEBAPP_DEMO_MODE=1` and serves built-in `AAPL`, `AMD`, `NVDA`, and `SPY` examples so the product remains stable during a presentation.
+This is the recommended mode for live demos, since it does not depend on any third-party API being available at presentation time.
 
-### Temporary Public Demo URL
+---
 
-If you want a public URL without setting up a full cloud deployment, you can expose the local demo app through a temporary Cloudflare quick tunnel:
+## Deploy Your Own Public Instance
 
-```bash
-bash examples/run_public_financial_demo.sh
-```
+The repository includes a top-level [`render.yaml`](render.yaml) blueprint and a [`Procfile`](Procfile) so the app can be deployed directly from GitHub.
 
-This prints a `trycloudflare.com` URL and keeps the app reachable while the shell remains running. The frontend includes a polling fallback so the demo still works if SSE is unavailable over the tunnel.
+**Simplest path — Render:**
 
-### Deploy It To A Real Public URL
-
-For the course submission, use a managed host instead of a temporary tunnel. The repository now includes a root-level [`render.yaml`](render.yaml) blueprint and [`Procfile`](Procfile) so you can deploy the app directly from GitHub.
-
-The simplest path is Render:
-
-1. Push this repository to GitHub.
-2. Create a new Web Service on Render and point it at the repository.
-3. Render can use the included blueprint or the following commands:
-   - Build: `pip install '.[openai,webapp]'`
-   - Start: `cave-agent-webapp`
-4. Use `WEBAPP_DEMO_MODE=1` if you want a stable classroom demo with no external keys.
-5. If you want live data instead, set `WEBAPP_DEMO_MODE=0` and configure:
+1. Fork or push this repository to your own GitHub account.
+2. Create a new Web Service on [Render](https://render.com/) and point it at your repository.
+3. Render will pick up the included blueprint. If you prefer to configure manually:
+   - Build command: `pip install '.[openai,webapp]'`
+   - Start command: `cave-agent-webapp`
+4. Configure environment variables in the Render dashboard:
+   - `LLM_MODEL_ID`, `LLM_API_KEY`, optional `LLM_BASE_URL`
    - `SEC_USER_AGENT`
    - optional `ALPHAVANTAGE_API_KEY`
-   - optional `FRED_API_KEY`
-   - `LLM_MODEL_ID`
-   - `LLM_API_KEY`
-   - optional `LLM_BASE_URL`
+5. Render assigns a default `*.onrender.com` URL, which is enough for a course submission.
 
-Without `ALPHAVANTAGE_API_KEY`, the app still runs in public-data mode using SEC filings plus stable market-data fallback so the product remains usable even when free market APIs are rate-limited.
+A fuller walkthrough is in [`docs/render-deployment.md`](docs/render-deployment.md).
 
-Render gives you a default `*.onrender.com` URL, which is enough for the course requirement. You do not need to buy a domain unless you want a branded URL. A full deployment walkthrough lives in [docs/render-deployment.md](docs/render-deployment.md).
+---
 
-### Teammate Handoff Materials
+## Repository Layout
 
-If another teammate needs to take over deployment, demo rehearsal, or final submission packaging, use:
-
-- [docs/teammate-handoff.md](docs/teammate-handoff.md)
-- [docs/delegation-brief.md](docs/delegation-brief.md)
-- [docs/submission-note-template.md](docs/submission-note-template.md)
-
-### Presentation Assets
-
-Generate the 5-minute course presentation deck:
-
-```bash
-python3.10 -m pip install -r slides/requirements.txt
-python3.10 slides/generate_financial_agent_deck.py
+```
+.
+├── src/cave_agent/            # Agent core library (imported from CaveAgent)
+│   ├── runtime/               # IPythonRuntime / IPyKernelRuntime
+│   ├── models/                # LLM adapters (OpenAI, LiteLLM)
+│   ├── skills/                # Agent Skills loader
+│   └── webapp/                # FastAPI product layer (project contribution)
+│       ├── app.py             # FastAPI entrypoint
+│       ├── agent_runner.py    # FinancialResearchRunner orchestration
+│       ├── service.py         # Session / run routing
+│       ├── financial_data.py  # SEC EDGAR + market data providers
+│       ├── finance_skills/    # Finance-specific runtime skills
+│       ├── templates/         # Jinja2 HTML
+│       └── static/            # CSS + vanilla JS frontend
+├── tests/                     # Pytest suite for agent core and webapp
+├── examples/                  # Usage scripts and demo launchers
+├── slides/                    # Course presentation deck and speaker notes
+├── docs/                      # Deployment and handoff notes
+├── render.yaml                # Render deployment blueprint
+└── Procfile                   # Alternative start command
 ```
 
-This writes the deck to [slides/cs5260_financial_agent_demo.pptx](slides/cs5260_financial_agent_demo.pptx). Speaker notes live in [slides/financial_agent_speaker_notes.md](slides/financial_agent_speaker_notes.md).
+---
 
-## Hello World
+## Architecture Overview
+
+The product is a thin FastAPI application on top of a persistent Python runtime.
+
+```
+┌─────────────┐    ┌───────────────┐    ┌───────────────────────┐    ┌──────────────┐
+│ Browser UI  │ -> │ FastAPI layer │ -> │ FinancialResearchRunner│ -> │ Data layer  │
+│ Jinja2 + JS │ <- │ sessions/runs │ <- │ (agent + skills)      │ <- │ SEC · Market │
+└─────────────┘    └───────────────┘    └───────────────────────┘    └──────────────┘
+                          │                        │
+                          ▼                        ▼
+                    SSE / polling          IPython runtime
+                    artifact download      (live DataFrames, skills)
+```
+
+**Execution flow for one prompt:**
+
+1. **Parse** — route finance vs. generic, extract tickers or market proxies.
+2. **Fetch** — load SEC filings and market data; fall back to the public-data provider if needed.
+3. **Inject** — insert price frames, fundamentals, and helper functions into the runtime as live Python variables.
+4. **Run** — the agent calls runtime skills to produce the answer and visual work products.
+5. **Materialize** — save charts, tables, and a markdown report to the session workspace.
+
+The FastAPI layer keeps the web concerns simple: each session owns a message history and a working folder, each user prompt becomes a cancellable run, and progress is streamed back to the page via SSE with a polling fallback.
+
+---
+
+## Underlying Agent Core
+
+The agent core (the `cave_agent` Python package in `src/`) is the [CaveAgent](https://github.com/acodercat/cave-agent) open-source library. It provides the persistent Python runtime, the `Variable` / `Function` / `Type` injection API, the Agent Skills loader, and the streaming LLM adapters used by this project.
+
+A minimal agent loop using the core library looks like this:
 
 ```python
 import asyncio
@@ -191,7 +201,7 @@ from cave_agent import CaveAgent
 from cave_agent.runtime import IPythonRuntime, Variable, Function
 from cave_agent.models import LiteLLMModel
 
-model = LiteLLMModel(model_id="model-id", api_key="your-api-key", custom_llm_provider="openai")
+model = LiteLLMModel(model_id="your-model", api_key="your-key", custom_llm_provider="openai")
 
 async def main():
     def reverse(s: str) -> str:
@@ -199,482 +209,31 @@ async def main():
         return s[::-1]
 
     runtime = IPythonRuntime(
-        variables=[
-            Variable("secret", "!dlrow ,olleH", "A reversed message"),
-            Variable("greeting", "", "Store the reversed message"),
-        ],
+        variables=[Variable("secret", "!dlrow ,olleH", "A reversed message")],
         functions=[Function(reverse)],
     )
     agent = CaveAgent(model, runtime=runtime)
     response = await agent.run("Reverse the secret")
-    print(await runtime.retrieve("secret"))  # Hello, world!
-    print(response.content)              # Agent's text response
+    print(response.content)
 
 asyncio.run(main())
 ```
 
-## Runtimes
+Additional usage examples live under [`examples/`](examples/).
 
-CaveAgent provides two runtime backends. Both share the same API for injecting functions, variables, and types — choose based on your trust and isolation requirements.
-
-### IPythonRuntime (default)
-
-Code runs **in the same process** via an embedded IPython shell. Injected objects (DataFrames, DB connections, custom classes) are accessed directly — no serialization overhead.
-
-```python
-from cave_agent.runtime import IPythonRuntime, Function, Variable
-
-runtime = IPythonRuntime(
-    functions=[Function(my_func)],
-    variables=[Variable("data", my_dataframe, "Input data")],
-)
-agent = CaveAgent(model, runtime=runtime)
-```
-
-Best for: trusted environments, internal tools, when you need zero-overhead access to complex Python objects.
-
-### IPyKernelRuntime (process-isolated)
-
-Code runs in a **separate IPython kernel process**. If the code crashes (segfault, OOM, infinite loop), the host process stays alive — just reset the kernel and continue.
-
-```bash
-pip install 'cave-agent[ipykernel]'
-```
-
-```python
-from cave_agent.runtime import IPyKernelRuntime, Function, Variable
-
-async with IPyKernelRuntime(
-    functions=[Function(my_func)],
-    variables=[Variable("data", [1, 2, 3], "Input data")],
-) as runtime:
-    agent = CaveAgent(model, runtime=runtime)
-    response = await agent.run("Analyze the data")
-```
-
-Injected objects are serialized via [dill](https://github.com/uqfoundation/dill), which supports local functions, closures, lambdas, and most Python objects.
-
-Best for: untrusted code execution, multi-tenant environments, sandboxed agent workflows.
-
-### Comparison
-
-| | IPythonRuntime | IPyKernelRuntime |
-|---|---|---|
-| Isolation | Same process | Separate process |
-| Crash impact | Host process dies | Kernel restarts, host survives |
-| Object injection | Direct reference, zero-copy | Serialized via dill |
-| Startup | Instant | ~1s (kernel launch) |
-| Local functions / closures | Always works | Works (via dill) |
-| Requires | *(included)* | `pip install 'cave-agent[ipykernel]'` |
-
-## Examples
-
-### Data Visualization
-
-```python
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPythonRuntime, Variable
-from cave_agent.models import LiteLLMModel
-
-model = LiteLLMModel(model_id="model-id", api_key="your-api-key", custom_llm_provider="openai")
-
-# 1. Inject — real DB connection & chart config manager
-runtime = IPythonRuntime(
-    variables=[
-        Variable("engine", database_engine),             # SQLAlchemy Engine
-        Variable("echarts_config_manager", EChartsConfigManager()),  # Chart collector
-    ]
-)
-agent = CaveAgent(model, runtime=runtime)
-
-# 2. Query — LLM sees object types, not data
-await agent.run("Show me the air quality trend for the past week")
-
-# LLM generates & executes:
-#   df = pd.read_sql("SELECT * FROM air_quality WHERE ...", engine)
-#   echarts_config_manager.add_config({
-#       "title": {"text": "Air Quality - Past Week"},
-#       "xAxis": {"data": dates},
-#       "series": [{"name": "PM2.5", "type": "line", "data": ...}]
-#   })
-
-# 3. Retrieve — get real chart configs for rendering
-mgr = await runtime.retrieve("echarts_config_manager")  # Real Python object
-configs = mgr.get_configs()
-
-for config in configs:
-    render_echarts(config)  # Render directly in web UI
-```
-
-### Function Calling
-
-```python
-# Inject functions and variables into runtime
-runtime = IPythonRuntime(
-    variables=[Variable("tasks", [], "User's task list")],
-    functions=[Function(add_task), Function(complete_task)],
-)
-agent = CaveAgent(model, runtime=runtime)
-
-await agent.run("Add 'buy groceries' to my tasks")
-print(await runtime.retrieve("tasks"))  # [{'name': 'buy groceries', 'done': False}]
-```
-
-See [examples/basic_usage.py](examples/basic_usage.py) for a complete example.
-
-### Stateful Object Interactions
-
-```python
-# Inject objects with methods - LLM can call them directly
-runtime = IPythonRuntime(
-    types=[Type(Light), Type(Thermostat)],
-    variables=[
-        Variable("light", Light("Living Room"), "Smart light"),
-        Variable("thermostat", Thermostat(), "Home thermostat"),
-    ],
-)
-agent = CaveAgent(model, runtime=runtime)
-
-await agent.run("Dim the light to 20% and set thermostat to 22°C")
-light = await runtime.retrieve("light")  # Object with updated state
-```
-
-See [examples/object_methods.py](examples/object_methods.py) for a complete example.
-
-### Multi-Agent Coordination
-
-```python
-# Sub-agents with their own runtimes
-cleaner_agent = CaveAgent(model, runtime=IPythonRuntime(variables=[
-    Variable("data", [], "Input"), Variable("cleaned_data", [], "Output"),
-]))
-
-analyzer_agent = CaveAgent(model, runtime=IPythonRuntime(variables=[
-    Variable("data", [], "Input"), Variable("insights", {}, "Output"),
-]))
-
-# Orchestrator controls sub-agents as first-class objects
-orchestrator = CaveAgent(model, runtime=IPythonRuntime(variables=[
-    Variable("raw_data", raw_data, "Raw dataset"),
-    Variable("cleaner", cleaner_agent, "Cleaner agent"),
-    Variable("analyzer", analyzer_agent, "Analyzer agent"),
-]))
-
-# Inject → trigger → retrieve
-await orchestrator.run("Clean raw_data using cleaner, then analyze using analyzer")
-insights = await analyzer.runtime.retrieve("insights")
-```
-
-See [examples/multi_agent.py](examples/multi_agent.py) for a complete example.
-
-### Real-time Streaming
-
-```python
-async for event in agent.stream_events("Analyze this data"):
-    if event.type.value == 'code':
-        print(f"Executing: {event.content}")
-    elif event.type.value == 'execution_output':
-        print(f"Result: {event.content}")
-```
-
-See [examples/stream.py](examples/stream.py) for a complete example.
-
-### Security Rules
-
-```python
-# Block dangerous operations with AST-based validation
-rules = [
-    ImportRule({"os", "subprocess", "sys"}),
-    FunctionRule({"eval", "exec", "open"}),
-    AttributeRule({"__globals__", "__builtins__"}),
-    RegexRule([r"rm\s+-rf", r"sudo\s+"]),
-]
-runtime = IPythonRuntime(security_checker=SecurityChecker(rules))
-```
-
-### More Examples
-
-- [Basic Usage](examples/basic_usage.py): Function calling and object processing
-- [Runtime State](examples/runtime_state.py): State management across interactions
-- [Object Methods](examples/object_methods.py): Class methods and complex objects
-- [Multi-Turn](examples/multi_turn.py): Conversations with state persistence
-- [Multi-Agent](examples/multi_agent.py): Data pipeline with multiple agents
-- [Stream](examples/stream.py): Streaming responses and events
-
-## Agent Skills
-
-CaveAgent implements the [Agent Skills](https://agentskills.io) open standard—a portable format for packaging instructions that agents can discover and use. Originally developed by Anthropic and now supported across the AI ecosystem (Claude, Gemini CLI, Cursor, VS Code, and more), Skills enable agents to acquire domain expertise on-demand.
-
-<p align="center">
-  <img src="https://github.com/acodercat/cave-agent/raw/master/assets/skills.png" alt="Agent Skills Architecture" width="85%">
-</p>
-
-### Creating a Skill
-
-A Skill is a directory containing a `SKILL.md` file with YAML frontmatter:
-
-```
-my-skill/
-├── SKILL.md           # Required: Skill definition and instructions
-└── injection.py       # Optional: Functions/variables/types to inject (CaveAgent extension)
-```
-
-**SKILL.md** structure:
-
-```markdown
----
-name: data-processor
-description: Process and analyze datasets with statistical methods. Use when working with data analysis tasks.
 ---
 
-# Data Processing Instructions
+## Acknowledgements
 
-## Quick Start
-Use the injected functions to analyze datasets...
+- **NUS CS5260 — Neural Networks: Foundations to Applications** — the course that framed this project and its scope.
+- **[CaveAgent](https://github.com/acodercat/cave-agent)** — the open-source agent core (runtime, skills, LLM adapters) used as a library.
+- **SEC EDGAR** — public U.S. company filings data source.
+- **Render** — public hosting used for the deployed instance.
 
-## Workflows
-1. Activate the skill to load injected functions
-2. Apply statistical analysis using the provided functions
-3. Return structured results
-```
+This repository is a coursework submission. It is released under an open-source license so that the teaching staff and teammates can reproduce, inspect, and extend it.
 
-**Required fields**: `name` (max 64 chars, lowercase with hyphens) and `description` (max 1024 chars)
-
-**Optional fields**: `license`, `compatibility`, `metadata`
-
-### How Skills Load (Progressive Disclosure)
-
-Skills use progressive disclosure to minimize context usage:
-
-| Level | When Loaded | Content |
-|-------|-------------|---------|
-| **Metadata** | At startup | `name` and `description` from YAML frontmatter (~100 tokens) |
-| **Instructions** | When activated | SKILL.md body with guidance (loaded on-demand) |
-
-### Using Skills
-
-```python
-from pathlib import Path
-from cave_agent import CaveAgent, Skill
-from cave_agent.skills import SkillDiscovery
-from cave_agent.runtime import Function, Variable
-
-# Create skills directly
-skill = Skill(
-    name="my-skill",
-    description="A custom skill",
-    body_content="# Instructions\nFollow these steps...",
-    functions=[Function(my_func)],
-    variables=[Variable("config", value={})],
-)
-agent = CaveAgent(model=model, skills=[skill])
-
-# Or load from files
-skill = SkillDiscovery.from_file(Path("./my-skill/SKILL.md"))
-agent = CaveAgent(model=model, skills=[skill])
-
-# Or load from directory
-skills = SkillDiscovery.from_directory(Path("./skills"))
-agent = CaveAgent(model=model, skills=skills)
-```
-
-When skills are loaded, the agent gains access to the `activate_skill(skill_name)` runtime function to activate a skill and load its instructions.
-
-### Injection Module (CaveAgent Extension)
-
-CaveAgent extends the Agent Skills standard with `injection.py`—allowing skills to inject functions, variables, and types directly into the runtime when activated:
-
-```python
-from cave_agent.runtime import Function, Variable, Type
-from dataclasses import dataclass
-
-def analyze_data(data: list) -> dict:
-    """Analyze data and return statistics."""
-    return {"mean": sum(data) / len(data), "count": len(data)}
-
-@dataclass
-class AnalysisResult:
-    mean: float
-    count: int
-    status: str
-
-CONFIG = {"threshold": 0.5, "max_items": 1000}
-
-__exports__ = [
-    Function(analyze_data, description="Analyze data statistically"),
-    Variable("CONFIG", value=CONFIG, description="Analysis configuration"),
-    Type(AnalysisResult, description="Result structure"),
-]
-```
-
-When `activate_skill()` is called, these exports are automatically injected into the runtime namespace.
-
-See [examples/skill_data_processor.py](examples/skill_data_processor.py) for a complete example.
-
-<p align="center">
-  <img src="https://github.com/acodercat/cave-agent/raw/master/assets/overall.png" alt="CaveAgent Architecture">
-</p>
-
-## Context Compaction
-
-Long conversations inevitably fill up the model's context window. CaveAgent implements a multi-tier compaction strategy inspired by [Claude Code](https://docs.anthropic.com/en/docs/claude-code)'s context management system.
-
-**How it works:**
-
-```
-Token usage exceeds threshold?
-        |
-        v
-  Tier 1: Microcompact (no LLM, instant)
-  Clear old execution results, keep recent 6.
-  Tokens under threshold? → done
-        |
-        v
-  Tier 2: Full Compact (LLM summarization)
-  Summarize older messages, keep recent half.
-  Uses dual-phase prompt: <analysis> (discarded) + <summary> (kept).
-        |
-        v
-  Tier 3: Trim Fallback (last resort)
-  Keep recent half of messages, drop the rest.
-```
-
-The system message (index 0) is always preserved. A **circuit breaker** stops attempting LLM summarization after 3 consecutive failures, falling back to trim to avoid wasting API calls.
-
-```python
-agent = CaveAgent(
-    model,
-    runtime=runtime,
-    context_window=128_000,  # triggers compaction at ~77% usage
-)
-```
-
-## API Resilience
-
-CaveAgent handles transient API failures and output truncation automatically.
-
-**Retry with exponential backoff:** Rate limits (429), server errors (5xx), timeouts (408), and connection errors are retried up to 5 times with exponential backoff (0.5s, 1s, 2s, 4s, 8s) plus jitter. `Retry-After` headers are respected when present.
-
-**Output truncation recovery:** When the model's response is cut off (`finish_reason="length"`), the agent automatically appends the partial response to history and asks the model to continue from where it stopped. This repeats up to 3 times before giving up.
-
-```
-Model response truncated (finish_reason="length")
-        |
-        v
-  Append partial response as AssistantMessage
-  Inject: "Output limit hit. Resume directly, pick up mid-thought."
-  Retry (up to 3 times)
-        |
-        v
-  Model continues from the cutoff point
-```
-
-## Features
-
-- **Code-Based Function Calling**: Leverages LLM's natural coding abilities instead of rigid JSON schemas
-- **Secure Runtime Environment**:
-  - Inject Python objects, variables, and functions as tools
-  - Rule-based security validation prevents dangerous code execution
-  - Flexible security rules: ImportRule, FunctionRule, AttributeRule, RegexRule
-  - Customizable security policies for different use cases
-  - Access execution results and maintain state across interactions
-- **[Agent Skills](https://agentskills.io)**: Implements the open Agent Skills standard for modular, portable instruction packages. CaveAgent extends the standard with runtime injection (`injection.py`).
-- **Multi-Agent Coordination**: Control sub-agents programmatically through runtime injection and retrieval. Shared runtimes enable instant state synchronization.
-- **Context Compaction**: Inspired by [Claude Code](https://docs.anthropic.com/en/docs/claude-code)'s multi-tier context management — microcompact (clear old execution results, no LLM) → full compact (LLM summarization with dual-phase analysis+summary prompt) → trim fallback, with circuit breaker protection against cascading failures
-- **API Resilience**: Automatic retry with exponential backoff + jitter for rate limits (429), server errors (5xx), and connection failures. Output truncation recovery automatically continues when the model's response is cut off by `max_tokens`
-- **Streaming & Async**: Real-time event streaming and full async/await support for optimal performance
-- **Execution Control**: Configurable step limits and error handling to prevent infinite loops
-- **Flexible LLM Support**: Works with any LLM provider via OpenAI-compatible APIs or LiteLLM
-- **Type Injection**: Expose class schemas for type-aware LLM code generation
-
-
-## Awesome Blogs
-
-We thank these community to post our work.
-
-- [CaveAgent让LLM学会了“跑代码”，你能把Agent变成Jupyter里的“老司机”](https://mp.weixin.qq.com/s/cJQ8ki0gXSmcbTPaBBfT5g)
-- [Token消耗减半性能满分！状态化运行时管理能力让智能体性能飞升](https://mp.weixin.qq.com/s/qfVl3ATO4ueDdPb4npmTXQ)
-- [Stateful environment to LLMs](https://x.com/rosinality/status/2008434433972728264)
-- [TEKTA-AI](https://www.tekta.ai/ai-research-papers/caveagent-stateful-llm-runtime-2025)
-
-## Configuration
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| model | Model | required | LLM model instance (OpenAIServerModel or LiteLLMModel) |
-| runtime | Runtime | None | `IPythonRuntime` (default) or `IPyKernelRuntime` (process-isolated) |
-| skills | List[Skill] | None | List of skill objects to load |
-| max_steps | int | 10 | Maximum execution steps per run |
-| context_window | int | 128000 | Model context window size in tokens. Controls when context compaction triggers |
-| max_exec_output | int | 5000 | Max characters in execution output |
-| max_exec_timeout | float \| None | None | Max seconds per code execution. LLM is guided to use timeouts in network/DB calls |
-| display | bool | True | Render events to terminal via Rich (Claude Code-style UI) |
-| instructions | str | default | User instructions defining agent role and behavior |
-| system_instructions | str | default | System-level execution rules and examples |
-| system_prompt_template | str | default | Custom system prompt template |
-| python_block_identifier | str | python | Code block language identifier |
-| messages | List[Message] | None | Initial message history |
-
-## LLM Provider Support
-
-CaveAgent supports multiple LLM providers:
-
-### OpenAI-Compatible Models
-```python
-from cave_agent.models import OpenAIServerModel
-
-model = OpenAIServerModel(
-    model_id="gpt-4",
-    api_key="your-api-key",
-    base_url="https://api.openai.com/v1"  # or your custom endpoint
-)
-```
-
-### LiteLLM Models (Recommended)
-LiteLLM provides unified access to hundreds of LLM providers:
-
-```python
-from cave_agent.models import LiteLLMModel
-
-# OpenAI
-model = LiteLLMModel(
-    model_id="gpt-4",
-    api_key="your-api-key",
-    custom_llm_provider='openai'
-)
-
-# Anthropic Claude
-model = LiteLLMModel(
-    model_id="claude-3-sonnet-20240229",
-    api_key="your-api-key",
-    custom_llm_provider='anthropic' 
-)
-
-# Google Gemini
-model = LiteLLMModel(
-    model_id="gemini/gemini-pro",
-    api_key="your-api-key"
-)
-```
-
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a PR.
-For more details, see [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## Citation
-
-If you use CaveAgent in your research, please cite:
-```bibtex
-@article{ran2026caveagent,
-  title={CaveAgent: Transforming LLMs into Stateful Runtime Operators},
-  author={Ran, Maohao and Wan, Zhenglin and Lin, Cooper and Zhang, Yanting and others},
-  journal={arXiv preprint arXiv:2601.01569},
-  year={2026}
-}
-```
+---
 
 ## License
 
-MIT License
+This project is distributed under the [MIT License](LICENSE).
