@@ -4,7 +4,7 @@ Smart Home Skill Injection
 Injects device states and control functions into the agent's runtime.
 """
 
-from cave_agent.runtime import Function
+from pycallingagent.runtime import Function
 
 # Current state of all devices
 devices = {

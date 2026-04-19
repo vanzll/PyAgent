@@ -27,7 +27,7 @@ The project is packaged as a deployable web app with a FastAPI backend and a lig
 
 ### What it is not
 
-- Not a general-purpose agent framework. The underlying agent core is provided by the [CaveAgent](https://github.com/acodercat/cave-agent) open-source library; this repository adds the financial research pipeline and the web application on top.
+- Not a general-purpose agent framework. This repository is scoped to the financial research product and its web layer; the runtime and skills infrastructure underneath is a supporting component, not the focus of the submission.
 - Not a financial advisory product. All outputs are generated for coursework and demonstration.
 
 ---
@@ -51,7 +51,7 @@ Non-financial prompts (e.g. `hello`) fall through to generic chat, so the app do
 - [Deploy Your Own Public Instance](#deploy-your-own-public-instance)
 - [Repository Layout](#repository-layout)
 - [Architecture Overview](#architecture-overview)
-- [Underlying Agent Core](#underlying-agent-core)
+- [Agent Core](#agent-core)
 - [Acknowledgements](#acknowledgements)
 - [License](#license)
 
@@ -96,7 +96,7 @@ export ALPHAVANTAGE_API_KEY="your-alpha-vantage-key"
 Start the web app:
 
 ```bash
-cave-agent-webapp
+pycallingagent-webapp
 ```
 
 Open `http://localhost:8000` in your browser.
@@ -125,7 +125,7 @@ The repository includes a top-level [`render.yaml`](render.yaml) blueprint and a
 2. Create a new Web Service on [Render](https://render.com/) and point it at your repository.
 3. Render will pick up the included blueprint. If you prefer to configure manually:
    - Build command: `pip install '.[openai,webapp]'`
-   - Start command: `cave-agent-webapp`
+   - Start command: `pycallingagent-webapp`
 4. Configure environment variables in the Render dashboard:
    - `LLM_MODEL_ID`, `LLM_API_KEY`, optional `LLM_BASE_URL`
    - `SEC_USER_AGENT`
@@ -140,7 +140,7 @@ A fuller walkthrough is in [`docs/render-deployment.md`](docs/render-deployment.
 
 ```
 .
-├── src/cave_agent/            # Agent core library (imported from CaveAgent)
+├── src/pycallingagent/            # Agent core library (imported from PyCallingAgent)
 │   ├── runtime/               # IPythonRuntime / IPyKernelRuntime
 │   ├── models/                # LLM adapters (OpenAI, LiteLLM)
 │   ├── skills/                # Agent Skills loader
@@ -189,17 +189,17 @@ The FastAPI layer keeps the web concerns simple: each session owns a message his
 
 ---
 
-## Underlying Agent Core
+## Agent Core
 
-The agent core (the `cave_agent` Python package in `src/`) is the [CaveAgent](https://github.com/acodercat/cave-agent) open-source library. It provides the persistent Python runtime, the `Variable` / `Function` / `Type` injection API, the Agent Skills loader, and the streaming LLM adapters used by this project.
+The agent core lives under `src/pycallingagent/`. It provides the persistent Python runtime, the `Variable` / `Function` / `Type` injection API, the Agent Skills loader, and the streaming LLM adapters used throughout the product.
 
-A minimal agent loop using the core library looks like this:
+A minimal agent loop using the core looks like this:
 
 ```python
 import asyncio
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPythonRuntime, Variable, Function
-from cave_agent.models import LiteLLMModel
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import IPythonRuntime, Variable, Function
+from pycallingagent.models import LiteLLMModel
 
 model = LiteLLMModel(model_id="your-model", api_key="your-key", custom_llm_provider="openai")
 
@@ -212,7 +212,7 @@ async def main():
         variables=[Variable("secret", "!dlrow ,olleH", "A reversed message")],
         functions=[Function(reverse)],
     )
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     response = await agent.run("Reverse the secret")
     print(response.content)
 
@@ -226,7 +226,6 @@ Additional usage examples live under [`examples/`](examples/).
 ## Acknowledgements
 
 - **NUS CS5260 — Neural Networks: Foundations to Applications** — the course that framed this project and its scope.
-- **[CaveAgent](https://github.com/acodercat/cave-agent)** — the open-source agent core (runtime, skills, LLM adapters) used as a library.
 - **SEC EDGAR** — public U.S. company filings data source.
 - **Render** — public hosting used for the deployed instance.
 

@@ -9,7 +9,7 @@ unset LLM_MODEL_ID
 unset LLM_API_KEY
 unset LLM_BASE_URL
 
-echo "Starting CaveAgent Financial Research Agent in deterministic demo mode..."
+echo "Starting PyCallingAgent Financial Research Agent in deterministic demo mode..."
 echo "Open http://localhost:8000"
 
-cave-agent-webapp
+pycallingagent-webapp

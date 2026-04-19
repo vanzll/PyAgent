@@ -4,8 +4,8 @@ import pytest
 import pytest_asyncio
 from dataclasses import dataclass
 
-from cave_agent.runtime import IPyKernelRuntime, ExecutionResult, ErrorFeedbackMode, Function, Variable, Type
-from cave_agent.security import SecurityChecker, ImportRule, FunctionRule
+from pycallingagent.runtime import IPyKernelRuntime, ExecutionResult, ErrorFeedbackMode, Function, Variable, Type
+from pycallingagent.security import SecurityChecker, ImportRule, FunctionRule
 
 
 @pytest_asyncio.fixture(scope="module")

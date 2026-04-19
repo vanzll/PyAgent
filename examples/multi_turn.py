@@ -1,6 +1,6 @@
-from cave_agent import CaveAgent
-from cave_agent.models import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Variable, Type
+from pycallingagent import PyCallingAgent
+from pycallingagent.models import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Variable, Type
 import os
 import asyncio
 
@@ -66,7 +66,7 @@ async def main():
     )
 
     # Create agent
-    agent = CaveAgent(model, runtime=runtime, display=True)
+    agent = PyCallingAgent(model, runtime=runtime, display=True)
 
     # Multi-turn conversation
     print("Starting analysis conversation...")
@@ -91,7 +91,7 @@ async def main():
     # runtime_streaming = IPythonRuntime(
     #     variables=[analyzer_var, numbers_var, stats_var]
     # )
-    # agent_streaming = CaveAgent(model, runtime=runtime_streaming)
+    # agent_streaming = PyCallingAgent(model, runtime=runtime_streaming)
 
     # async for event in agent_streaming.stream_events(
     #     "Analyze the numbers, calculate the range (max - min), and tell me if the data is spread out"

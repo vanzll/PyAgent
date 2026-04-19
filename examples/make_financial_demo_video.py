@@ -140,7 +140,7 @@ def scene_hero(homepage: Path, target: Path) -> None:
     scene = Image.alpha_composite(cropped.convert("RGBA"), overlay)
     draw = ImageDraw.Draw(scene)
     draw_pill(draw, (56, 48, 320, 92), "NUS CS5260 FINAL PROJECT", GOLD, INK)
-    draw.text((58, 146), "CaveAgent Research Desk", fill=WHITE, font=SERIF_TITLE)
+    draw.text((58, 146), "PyCallingAgent Research Desk", fill=WHITE, font=SERIF_TITLE)
     draw.text((60, 214), "A public financial research agent for U.S. stocks and ETFs", fill=(221, 228, 239), font=SANS)
     body = "Ask a ticker, fetch public market data, and return charts, tables, and a concise research brief."
     draw.rounded_rectangle((48, 294, 710, 478), radius=28, fill=(11, 20, 35, 180), outline=(35, 48, 72, 180), width=2)
@@ -312,7 +312,7 @@ def main() -> None:
     try:
         if not is_server_running("http://127.0.0.1:8000/"):
             server = subprocess.Popen(
-                [sys.executable, "-m", "cave_agent.webapp"],
+                [sys.executable, "-m", "pycallingagent.webapp"],
                 cwd=ROOT,
                 env=env,
                 stdout=subprocess.DEVNULL,

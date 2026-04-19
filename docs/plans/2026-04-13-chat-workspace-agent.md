@@ -6,7 +6,7 @@
 
 **Architecture:** Keep the existing financial runner, provider layer, artifact generation, and run streaming. Add a session layer on top that stores chat messages, current tickers, and the latest workspace state. Replace the single-form UI with a chat panel plus workspace panel.
 
-**Tech Stack:** FastAPI, Jinja2, vanilla JS, SSE/polling fallback, existing CaveAgent finance runner.
+**Tech Stack:** FastAPI, Jinja2, vanilla JS, SSE/polling fallback, existing PyCallingAgent finance runner.
 
 ---
 
@@ -14,7 +14,7 @@
 
 **Files:**
 - Modify: `tests/test_webapp.py`
-- Modify: `src/cave_agent/webapp/models.py`
+- Modify: `src/pycallingagent/webapp/models.py`
 
 - [ ] Add failing tests for session creation, message submission, multi-turn history, and session artifact aggregation.
 - [ ] Run the focused test file and confirm the new tests fail for missing session APIs.
@@ -24,8 +24,8 @@
 ### Task 2: Session service and APIs
 
 **Files:**
-- Modify: `src/cave_agent/webapp/service.py`
-- Modify: `src/cave_agent/webapp/app.py`
+- Modify: `src/pycallingagent/webapp/service.py`
+- Modify: `src/pycallingagent/webapp/app.py`
 
 - [ ] Implement session lifecycle methods and session event streaming.
 - [ ] Reuse the existing runner to back each assistant turn with a run record.
@@ -35,9 +35,9 @@
 ### Task 3: Chat + workspace frontend
 
 **Files:**
-- Modify: `src/cave_agent/webapp/templates/index.html`
-- Modify: `src/cave_agent/webapp/static/app.css`
-- Modify: `src/cave_agent/webapp/static/app.js`
+- Modify: `src/pycallingagent/webapp/templates/index.html`
+- Modify: `src/pycallingagent/webapp/static/app.css`
+- Modify: `src/pycallingagent/webapp/static/app.js`
 
 - [ ] Replace the single-submit workbench with a multi-turn chat layout.
 - [ ] Add session bootstrapping and local session restoration in the browser.

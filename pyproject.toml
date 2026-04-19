@@ -1,7 +1,7 @@
 [project]
-name = "cave-agent"
+name = "pycallingagent"
 version = "0.7.3"
-description = "CaveAgent is a tool-augmented agent framework that enables function-calling through LLM code generation and provides runtime state management. Unlike traditional JSON-schema approaches, it natively handles complex Python objects like DataFrames and ndarrays within a persistent runtime, enabling lossless data flow across multi-turn interactions."
+description = "PyCallingAgent is a tool-augmented agent framework that enables function-calling through LLM code generation and provides runtime state management. Unlike traditional JSON-schema approaches, it natively handles complex Python objects like DataFrames and ndarrays within a persistent runtime, enabling lossless data flow across multi-turn interactions."
 readme = "README.md"
 authors = [
     { name = "Ram", email = "codermao@gmail.com" }
@@ -24,11 +24,11 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/acodercat/cave-agent"
-Repository = "https://github.com/acodercat/cave-agent"
+Homepage = "https://github.com/vanzll/PyAgent"
+Repository = "https://github.com/vanzll/PyAgent"
 
 [project.scripts]
-cave-agent-webapp = "cave_agent.webapp.__main__:main"
+pycallingagent-webapp = "pycallingagent.webapp.__main__:main"
 
 [project.optional-dependencies]
 litellm = [

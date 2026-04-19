@@ -1,7 +1,7 @@
 import pytest
 from dataclasses import dataclass
 from enum import Enum
-from cave_agent.runtime import IPythonRuntime, Variable, Function, Type
+from pycallingagent.runtime import IPythonRuntime, Variable, Function, Type
 
 
 @pytest.fixture

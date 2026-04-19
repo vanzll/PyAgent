@@ -1,6 +1,6 @@
-from cave_agent import CaveAgent
-from cave_agent.skills import SkillDiscovery
-from cave_agent.models import LiteLLMModel
+from pycallingagent import PyCallingAgent
+from pycallingagent.skills import SkillDiscovery
+from pycallingagent.models import LiteLLMModel
 from pathlib import Path
 import os
 import asyncio
@@ -33,7 +33,7 @@ async def main():
     print("=== Agent Skills Example ===\n")
 
     # Create agent with skills from directory
-    agent = CaveAgent(model=model, skills=skills)
+    agent = PyCallingAgent(model=model, skills=skills)
 
     # Show loaded skills
     print("Loaded skills:")

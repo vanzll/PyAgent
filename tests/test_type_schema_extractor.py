@@ -3,7 +3,7 @@
 import pytest
 from typing import List, Dict, Optional, Union, Callable, Any
 
-from cave_agent.runtime import TypeSchemaExtractor
+from pycallingagent.runtime import TypeSchemaExtractor
 
 
 # =============================================================================

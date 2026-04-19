@@ -38,10 +38,10 @@ The repository includes [`render.yaml`](../render.yaml). Render can read it dire
 The blueprint already sets:
 
 - Build command: `pip install '.[openai,webapp]'`
-- Start command: `cave-agent-webapp`
+- Start command: `pycallingagent-webapp`
 - Health check path: `/`
 - Python version: `3.12.8`
-- Storage root: `/tmp/cave-agent-webapp`
+- Storage root: `/tmp/pycallingagent-webapp`
 - Demo mode enabled by default
 
 ## Option B: Create The Web Service Manually
@@ -54,7 +54,7 @@ If you prefer not to use Blueprints:
 4. Configure:
    - Runtime: `Python`
    - Build Command: `pip install '.[openai,webapp]'`
-   - Start Command: `cave-agent-webapp`
+   - Start Command: `pycallingagent-webapp`
 5. Add environment variables.
 6. Deploy.
 
@@ -64,14 +64,14 @@ If you prefer not to use Blueprints:
 
 ```bash
 WEBAPP_DEMO_MODE=1
-WEBAPP_STORAGE_ROOT=/tmp/cave-agent-webapp
+WEBAPP_STORAGE_ROOT=/tmp/pycallingagent-webapp
 ```
 
 ### Live Data + LLM
 
 ```bash
 WEBAPP_DEMO_MODE=0
-WEBAPP_STORAGE_ROOT=/tmp/cave-agent-webapp
+WEBAPP_STORAGE_ROOT=/tmp/pycallingagent-webapp
 ALPHAVANTAGE_API_KEY=your-alpha-vantage-key
 SEC_USER_AGENT=Your Name your.email@example.com
 FRED_API_KEY=your-fred-key
@@ -87,7 +87,7 @@ The launcher now reads:
 - `HOST`, defaulting to `0.0.0.0`
 - `PORT`, defaulting to `8000`
 
-This matters because managed platforms inject their own `PORT` value. The entrypoint is implemented in [src/cave_agent/webapp/__main__.py](../src/cave_agent/webapp/__main__.py).
+This matters because managed platforms inject their own `PORT` value. The entrypoint is implemented in [src/pycallingagent/webapp/__main__.py](../src/pycallingagent/webapp/__main__.py).
 
 ## Public URL
 

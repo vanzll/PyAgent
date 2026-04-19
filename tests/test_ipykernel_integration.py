@@ -1,11 +1,11 @@
-"""Integration tests for CaveAgent + IPyKernelRuntime with a real LLM."""
+"""Integration tests for PyCallingAgent + IPyKernelRuntime with a real LLM."""
 
 import pytest
 import pytest_asyncio
 from dataclasses import dataclass
 
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPyKernelRuntime, Function, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import IPyKernelRuntime, Function, Variable
 
 
 # ---------------------------------------------------------------------------
@@ -65,7 +65,7 @@ async def multi_turn_agent(model):
         ],
     )
     await runtime.start()
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     yield agent
     await runtime.stop()
 
@@ -82,7 +82,7 @@ async def object_agent(model):
         ],
     )
     await runtime.start()
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     yield agent
     await runtime.stop()
 
@@ -101,7 +101,7 @@ async def calc_agent(model):
 
     runtime = IPyKernelRuntime(functions=[Function(add), Function(multiply)])
     await runtime.start()
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     yield agent
     await runtime.stop()
 
@@ -192,7 +192,7 @@ async def test_kernel_survives_error(model):
     )
     await runtime.start()
     try:
-        agent = CaveAgent(model, runtime=runtime, instructions="Execute exactly what the user asks.")
+        agent = PyCallingAgent(model, runtime=runtime, instructions="Execute exactly what the user asks.")
         # First turn: trigger an error
         await agent.run("Calculate 1/0 and catch the error, then set result = 'recovered'")
         result = await runtime.retrieve("result")

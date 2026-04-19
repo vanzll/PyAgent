@@ -6,7 +6,7 @@ agent's runtime when the skill is activated. Scripts can access
 these via runtime.retrieve("variable_name").
 """
 
-from cave_agent.runtime import Variable
+from pycallingagent.runtime import Variable
 
 # Sales transactions to be processed
 sales_data = [

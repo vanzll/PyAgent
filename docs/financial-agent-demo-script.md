@@ -106,11 +106,11 @@ What to point out:
 
 ### 30-second opening
 
-This project is a public financial research agent built on top of CaveAgent. Instead of asking users to manually gather price data, filings, and comparison metrics, the system accepts tickers and a research question, then automatically produces a short research brief, charts, and downloadable artifacts.
+This project is a public financial research agent built on top of PyCallingAgent. Instead of asking users to manually gather price data, filings, and comparison metrics, the system accepts tickers and a research question, then automatically produces a short research brief, charts, and downloadable artifacts.
 
 ### 60-second technical explanation
 
-The backend uses a structured provider layer for market data, SEC filing data, and optional macro data. These normalized objects are injected into CaveAgent's persistent runtime. The agent then activates domain-specific skills for market inspection, fundamentals, comparisons, charting, and report writing. The UI streams progress live and renders the resulting snapshot cards, tables, and charts.
+The backend uses a structured provider layer for market data, SEC filing data, and optional macro data. These normalized objects are injected into PyCallingAgent's persistent runtime. The agent then activates domain-specific skills for market inspection, fundamentals, comparisons, charting, and report writing. The UI streams progress live and renders the resulting snapshot cards, tables, and charts.
 
 ### 30-second product positioning
 

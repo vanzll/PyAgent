@@ -5,7 +5,7 @@ const fs = require("fs");
 // ─── CONSTANTS ───────────────────────────────────────────────────────────────
 
 const IMG = path.join(__dirname, "..", "static", "images");
-const OUT = path.join(__dirname, "caveagent_talk.pptx");
+const OUT = path.join(__dirname, "pycallingagent_talk.pptx");
 
 const C = {
   brown:      "B5784E",
@@ -34,8 +34,8 @@ const CONTENT_Y = 1.5;
 
 const pres = new pptxgen();
 pres.layout = "LAYOUT_WIDE";
-pres.author = "CaveAgent Team";
-pres.title = "CaveAgent: Transforming LLMs into Stateful Runtime Operators";
+pres.author = "PyCallingAgent Team";
+pres.title = "PyCallingAgent: Transforming LLMs into Stateful Runtime Operators";
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 
@@ -142,7 +142,7 @@ function buildOpening() {
       slide.addImage({ path: logoPath, x: W / 2 - 0.6, y: 0.6, w: 1.2, h: 1.2 });
     }
 
-    slide.addText("CaveAgent", {
+    slide.addText("PyCallingAgent", {
       x: MX, y: 2.0, w: CONTENT_W, h: 0.9,
       fontSize: 48, fontFace: C.bodyFont, bold: true, color: C.white, align: "center", margin: 0,
     });
@@ -167,7 +167,7 @@ function buildOpening() {
     slide.addShape(pres.shapes.RECTANGLE, { x: W / 2 - 2, y: 5.35, w: 4, h: 0.04, fill: { color: C.orange } });
     slide.addText([
       { text: "arXiv: 2601.01569", options: { fontSize: 13, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
-      { text: "GitHub: github.com/caveagent/cave-agent  \u00B7  PyPI: cave-agent v0.6.5", options: { fontSize: 13, color: C.lightText, fontFace: C.bodyFont } },
+      { text: "GitHub: github.com/vanzll/PyAgent  \u00B7  PyPI: pycallingagent v0.6.5", options: { fontSize: 13, color: C.lightText, fontFace: C.bodyFont } },
     ], { x: MX + 1.5, y: 5.6, w: CONTENT_W - 3, h: 0.7, align: "center" });
 
     addSlideNumber(slide, true);
@@ -212,7 +212,7 @@ function buildOpening() {
       fontSize: 14, fontFace: C.bodyFont, bold: true, color: C.darkBrown, margin: 0,
     });
     addBullets(slide, [
-      "CaveAgent \u2014 \u672C\u6B21\u62A5\u544A\u7684\u5DE5\u4F5C\uFF0CHKGAI \u6838\u5FC3\u6280\u672F",
+      "PyCallingAgent \u2014 \u672C\u6B21\u62A5\u544A\u7684\u5DE5\u4F5C\uFF0CHKGAI \u6838\u5FC3\u6280\u672F",
       "EBC: Diversifying Policy Behaviors (ICML 2025)",
       "POI Recommendation via Adversarial IL (AAAI 2025, oral)",
     ], MX + 0.3, CONTENT_Y + 3.5, 5.4, 1.1, { fontSize: 12 });
@@ -254,7 +254,7 @@ function buildOpening() {
       "\u591A\u6A21\u6001\u3001\u591A\u8BED\u8A00\u57FA\u7840\u6A21\u578B",
       "\u5782\u76F4\u9886\u57DF\u57FA\u7840\u6A21\u578B\uFF08\u6CD5\u5F8B\u3001\u533B\u7597\u3001\u521B\u610F\uFF09",
       "HKGAI V1: \u9999\u6E2F\u9996\u4E2A\u672C\u5730 AI \u6A21\u578B\uFF08\u7CA4\u8BED/\u666E\u901A\u8BDD/\u82F1\u8BED\uFF09",
-      "CaveAgent: \u6838\u5FC3\u6280\u672F\u4EA7\u54C1 HK E-Link",
+      "PyCallingAgent: \u6838\u5FC3\u6280\u672F\u4EA7\u54C1 HK E-Link",
     ], 7.1, CONTENT_Y + 3.25, 5.2, 1.5, { fontSize: 12 });
 
     slide.addText("www.hkgai.info", {
@@ -315,7 +315,7 @@ function buildOpening() {
     ], MX + 0.3, CONTENT_Y + 0.75, 5.3, 2.5, { fontSize: 15 });
 
     addCard(slide, 6.8, CONTENT_Y + 0.1, 5.8, 3.5, C.green);
-    slide.addText("CaveAgent: Runtime-Native", { x: 7.05, y: CONTENT_Y + 0.2, w: 5.3, h: 0.45, fontSize: 18, fontFace: C.bodyFont, bold: true, color: C.green, margin: 0 });
+    slide.addText("PyCallingAgent: Runtime-Native", { x: 7.05, y: CONTENT_Y + 0.2, w: 5.3, h: 0.45, fontSize: 18, fontFace: C.bodyFont, bold: true, color: C.green, margin: 0 });
     addBullets(slide, [
       "\u5BF9\u8C61\u76F4\u63A5\u6D3B\u5728\u6301\u4E45 Python runtime \u4E2D",
       "DataFrame \u76F4\u63A5\u64CD\u4F5C\uFF0C\u65E0\u9700\u8F6C\u6362",
@@ -333,7 +333,7 @@ function buildOpening() {
 
     addScaledImage(slide, "evolve.png", MX + 0.5, CONTENT_Y + 0.1, CONTENT_W - 1, 4.5);
 
-    slide.addText("Gen 0 Text-Only \u2192 Gen 1 JSON FC \u2192 Gen 2 Code-as-Action \u2192 Gen 3 Stateful Runtime (CaveAgent)", {
+    slide.addText("Gen 0 Text-Only \u2192 Gen 1 JSON FC \u2192 Gen 2 Code-as-Action \u2192 Gen 3 Stateful Runtime (PyCallingAgent)", {
       x: MX + 0.5, y: H - 1.2, w: CONTENT_W - 1, h: 0.5,
       fontSize: 15, fontFace: C.bodyFont, bold: true, color: C.darkBrown, align: "center",
     });
@@ -375,7 +375,7 @@ function buildOpening() {
 // ═══════════════════════════════════════════════════════════════════════════════
 
 function buildArchitecture() {
-  addSectionDivider("\u6838\u5FC3\u67B6\u6784", "CaveAgent Architecture");
+  addSectionDivider("\u6838\u5FC3\u67B6\u6784", "PyCallingAgent Architecture");
 
   // ── Slide 7: \u53CC\u6D41\u67B6\u6784\u603B\u89C8 ────────────────────────────────────────────
   {
@@ -418,7 +418,7 @@ function buildArchitecture() {
     ], 7.25, CONTENT_Y + 0.75, 5.2, 2.6, { fontSize: 14 });
 
     // Bottom: loop
-    addCalloutBox(slide, "CaveAgent.run(): \u6784\u5EFA\u63D0\u793A \u2192 \u53D1\u9001LLM \u2192 \u63D0\u53D6\u4EE3\u7801 \u2192 \u6267\u884C \u2192 \u53CD\u9988 \u2192 \u5FAA\u73AF", MX, CONTENT_Y + 4.0, CONTENT_W, 0.6, { borderColor: C.brown, bgColor: "FFF8EE", fontSize: 14 });
+    addCalloutBox(slide, "PyCallingAgent.run(): \u6784\u5EFA\u63D0\u793A \u2192 \u53D1\u9001LLM \u2192 \u63D0\u53D6\u4EE3\u7801 \u2192 \u6267\u884C \u2192 \u53CD\u9988 \u2192 \u5FAA\u73AF", MX, CONTENT_Y + 4.0, CONTENT_W, 0.6, { borderColor: C.brown, bgColor: "FFF8EE", fontSize: 14 });
   }
 
   // ── Slide 9: Runtime \u4E0E\u6CE8\u5165 API ─────────────────────────────────────────
@@ -427,9 +427,9 @@ function buildArchitecture() {
     addTitleBar(slide, "\u8FD0\u884C\u65F6\u6D41\u4E0E\u6CE8\u5165 API");
 
     // Left: code
-    const code = `from cave_agent import CaveAgent, Variable, Function
+    const code = `from pycallingagent import PyCallingAgent, Variable, Function
 
-agent = CaveAgent(model=model)
+agent = PyCallingAgent(model=model)
 
 # \u6CE8\u5165\u771F\u5B9E Python \u5BF9\u8C61
 agent.runtime.inject(Variable(
@@ -521,7 +521,7 @@ function buildSkillsAndCapabilities() {
     const hiOpts = { ...cOpts, fill: { color: C.resultHi } };
 
     const rows = [
-      [{ text: "\u7279\u6027", options: hOpts }, { text: "Standard Skills", options: hOpts }, { text: "CaveAgent Skills", options: hOpts }],
+      [{ text: "\u7279\u6027", options: hOpts }, { text: "Standard Skills", options: hOpts }, { text: "PyCallingAgent Skills", options: hOpts }],
       [{ text: "\u51FD\u6570\u8BBF\u95EE", options: cOpts }, { text: "\u6587\u672C\u63CF\u8FF0\uFF0CLLM\u81EA\u884C\u5B9E\u73B0", options: cOpts }, { text: "\u53EF\u8C03\u7528\u5BF9\u8C61\u76F4\u63A5\u6CE8\u5165", options: hiOpts }],
       [{ text: "\u72B6\u6001\u7BA1\u7406", options: cOpts }, { text: "\u65E0 \u2014 \u65E0\u72B6\u6001", options: cOpts }, { text: "\u53D8\u91CF/\u7C7B\u578B\u6301\u4E45\u5728 runtime", options: hiOpts }],
       [{ text: "\u53EF\u7EC4\u5408\u6027", options: cOpts }, { text: "\u6587\u672C\u7EA7\u94FE\u63A5", options: cOpts }, { text: "Python \u4EE3\u7801\u7EC4\u5408\u5BF9\u8C61", options: hiOpts }],
@@ -600,7 +600,7 @@ function buildExperiments() {
       "\u6BCF\u4E2A\u8BBE\u7F6E 3 \u6B21\u8FD0\u884C\uFF0C\u4FDD\u8BC1\u7EDF\u8BA1\u53EF\u9760\u6027",
     ], 7.1, CONTENT_Y + 0.65, 5.4, 1.8, { fontSize: 14 });
 
-    addCalloutBox(slide, "\u5BF9\u6BD4\u65B9\u5F0F\uFF1A\u540C\u4E00\u6A21\u578B\u3001\u540C\u4E00\u5DE5\u5177\u3001\u540C\u4E00\u4EFB\u52A1 \u2014 \u53EA\u6362\u4EA4\u4E92\u8303\u5F0F\uFF08JSON FC vs CaveAgent\uFF09", MX + 0.3, CONTENT_Y + 2.9, CONTENT_W - 0.6, 0.55, { borderColor: C.orange, bgColor: "FFF8EE", fontSize: 14 });
+    addCalloutBox(slide, "\u5BF9\u6BD4\u65B9\u5F0F\uFF1A\u540C\u4E00\u6A21\u578B\u3001\u540C\u4E00\u5DE5\u5177\u3001\u540C\u4E00\u4EFB\u52A1 \u2014 \u53EA\u6362\u4EA4\u4E92\u8303\u5F0F\uFF08JSON FC vs PyCallingAgent\uFF09", MX + 0.3, CONTENT_Y + 2.9, CONTENT_W - 0.6, 0.55, { borderColor: C.orange, bgColor: "FFF8EE", fontSize: 14 });
 
     // Stats preview
     addStatCallout(slide, "11/12", "Tau\u00B2-bench \u80DC\u51FA", MX + 0.5, CONTENT_Y + 3.8, 3.5, C.positive);
@@ -611,7 +611,7 @@ function buildExperiments() {
   // ── Slide 17: Tau\u00B2-bench + BFCL ──────────────────────────────────────────
   {
     const slide = pres.addSlide();
-    addTitleBar(slide, "Tau\u00B2-bench \u7ED3\u679C\uFF1A11/12 \u8BBE\u7F6E CaveAgent \u80DC\u51FA");
+    addTitleBar(slide, "Tau\u00B2-bench \u7ED3\u679C\uFF1A11/12 \u8BBE\u7F6E PyCallingAgent \u80DC\u51FA");
 
     const hOpts = { fill: { color: C.brown }, color: C.white, bold: true, fontSize: 11, fontFace: C.bodyFont, align: "center", valign: "middle" };
     const cOpts = { fontSize: 11, fontFace: C.bodyFont, color: C.darkBrown, align: "center", valign: "middle" };
@@ -619,7 +619,7 @@ function buildExperiments() {
     const dCell = { ...cOpts, color: C.positive, bold: true };
 
     const rows = [
-      [{ text: "Model", options: hOpts }, { text: "Domain", options: hOpts }, { text: "FC", options: hOpts }, { text: "CaveAgent", options: hOpts }, { text: "\u0394", options: hOpts }],
+      [{ text: "Model", options: hOpts }, { text: "Domain", options: hOpts }, { text: "FC", options: hOpts }, { text: "PyCallingAgent", options: hOpts }, { text: "\u0394", options: hOpts }],
       [{ text: "DeepSeek-V3.2", options: cOpts }, { text: "Airline", options: cOpts }, { text: "55.3%", options: cOpts }, { text: "60.0%", options: hiCell }, { text: "+4.7%", options: dCell }],
       [{ text: "", options: cOpts }, { text: "Retail", options: cOpts }, { text: "77.2%", options: cOpts }, { text: "81.9%", options: hiCell }, { text: "+4.7%", options: dCell }],
       [{ text: "Qwen3-Coder", options: cOpts }, { text: "Airline", options: cOpts }, { text: "38.0%", options: cOpts }, { text: "40.7%", options: hiCell }, { text: "+2.7%", options: dCell }],
@@ -656,7 +656,7 @@ function buildExperiments() {
     const dCell = { ...cOpts, color: C.positive, bold: true };
 
     const bfclRows = [
-      [{ text: "Model", options: hOpts }, { text: "FC", options: hOpts }, { text: "CaveAgent", options: hOpts }, { text: "\u0394", options: hOpts }],
+      [{ text: "Model", options: hOpts }, { text: "FC", options: hOpts }, { text: "PyCallingAgent", options: hOpts }, { text: "\u0394", options: hOpts }],
       [{ text: "DeepSeek-V3.2", options: cOpts }, { text: "86.9%", options: cOpts }, { text: "94.0%", options: hiCell }, { text: "+7.1%", options: dCell }],
       [{ text: "DeepSeek (w/o prompt)", options: cOpts }, { text: "53.1%", options: cOpts }, { text: "94.0%", options: hiCell }, { text: "+40.9%", options: dCell }],
       [{ text: "Qwen3-Coder", options: cOpts }, { text: "89.8%", options: cOpts }, { text: "94.4%", options: hiCell }, { text: "+4.6%", options: dCell }],
@@ -686,7 +686,7 @@ function buildExperiments() {
     });
 
     // Bottom
-    addCalloutBox(slide, "BFCL: DeepSeek \u65E0 prompt \u65F6 53.1% \u2192 94.0% (+40.9%) \u2014 CaveAgent \u5BF9 prompt \u683C\u5F0F\u7684\u9C81\u68D2\u6027\u66F4\u5F3A", MX, CONTENT_Y + 4.5, CONTENT_W, 0.55, { borderColor: C.blue, bgColor: "EBF0F5", fontSize: 13 });
+    addCalloutBox(slide, "BFCL: DeepSeek \u65E0 prompt \u65F6 53.1% \u2192 94.0% (+40.9%) \u2014 PyCallingAgent \u5BF9 prompt \u683C\u5F0F\u7684\u9C81\u68D2\u6027\u66F4\u5F3A", MX, CONTENT_Y + 4.5, CONTENT_W, 0.55, { borderColor: C.blue, bgColor: "EBF0F5", fontSize: 13 });
   }
 
   // ── Slide 19: \u72B6\u6001\u7BA1\u7406 + \u6848\u4F8B ─────────────────────────────────────────
@@ -707,7 +707,7 @@ function buildExperiments() {
     const hiCell2 = { ...cOpts2, fill: { color: C.resultHi }, bold: true };
 
     const dataRows = [
-      [{ text: "\u4EFB\u52A1", options: hOpts2 }, { text: "CaveAgent", options: hOpts2 }, { text: "CodeAct", options: hOpts2 }, { text: "JSON FC", options: hOpts2 }],
+      [{ text: "\u4EFB\u52A1", options: hOpts2 }, { text: "PyCallingAgent", options: hOpts2 }, { text: "CodeAct", options: hOpts2 }, { text: "JSON FC", options: hOpts2 }],
       [{ text: "Query", options: cOpts2 }, { text: "100%", options: hiCell2 }, { text: "80%", options: cOpts2 }, { text: "80%", options: cOpts2 }],
       [{ text: "Analysis", options: cOpts2 }, { text: "100%", options: hiCell2 }, { text: "100%", options: cOpts2 }, { text: "10%", options: { ...cOpts2, color: "CC3333" } }],
       [{ text: "Viz", options: cOpts2 }, { text: "90%", options: hiCell2 }, { text: "40%", options: cOpts2 }, { text: "30%", options: { ...cOpts2, color: "CC3333" } }],
@@ -828,8 +828,8 @@ function buildConclusion() {
 
     slide.addText([
       { text: "arXiv: 2601.01569", options: { fontSize: 15, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
-      { text: "GitHub: github.com/caveagent/cave-agent", options: { fontSize: 15, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
-      { text: "PyPI: pip install cave-agent", options: { fontSize: 15, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
+      { text: "GitHub: github.com/vanzll/PyAgent", options: { fontSize: 15, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
+      { text: "PyPI: pip install pycallingagent", options: { fontSize: 15, color: C.lightText, fontFace: C.bodyFont, breakLine: true } },
       { text: "", options: { fontSize: 8, breakLine: true } },
       { text: "Contact: junsong@hkbu.edu.hk  |  vanzl@u.nus.edu", options: { fontSize: 14, color: C.white, fontFace: C.bodyFont } },
     ], { x: MX + 2, y: 4.3, w: CONTENT_W - 4, h: 2.0, align: "center" });

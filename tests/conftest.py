@@ -1,6 +1,6 @@
 import pytest
 import os
-from cave_agent.models import OpenAIServerModel
+from pycallingagent.models import OpenAIServerModel
 
 @pytest.fixture
 def model():

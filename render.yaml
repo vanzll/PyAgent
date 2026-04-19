@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: cave-agent-financial-research
+    name: pycallingagent-financial-research
     runtime: python
     buildCommand: "pip install '.[openai,webapp]'"
-    startCommand: "cave-agent-webapp"
+    startCommand: "pycallingagent-webapp"
     healthCheckPath: /
     envVars:
       - key: PYTHON_VERSION
@@ -11,7 +11,7 @@ services:
       - key: WEBAPP_DEMO_MODE
         value: "1"
       - key: WEBAPP_STORAGE_ROOT
-        value: /tmp/cave-agent-webapp
+        value: /tmp/pycallingagent-webapp
       - key: SEC_USER_AGENT
         sync: false
       - key: ALPHAVANTAGE_API_KEY

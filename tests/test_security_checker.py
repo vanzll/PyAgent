@@ -1,10 +1,10 @@
 import pytest
 
-from cave_agent.security import (
+from pycallingagent.security import (
     SecurityChecker, SecurityError, ImportRule, FunctionRule, AttributeRule, RegexRule
 )
-from cave_agent.runtime import IPythonRuntime
-from cave_agent.runtime.executor import IPythonExecutor
+from pycallingagent.runtime import IPythonRuntime
+from pycallingagent.runtime.executor import IPythonExecutor
 
 
 class TestSecurityChecker:

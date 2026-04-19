@@ -1,4 +1,4 @@
-# CaveAgent Paper Website — Design Plan
+# PyCallingAgent Paper Website — Design Plan
 
 **Date:** 2026-03-07
 **Approach:** Academic Project Page Template + Enhanced Interactions (Plan B)
@@ -24,8 +24,8 @@
 
 ### Section 1: Hero
 
-- CaveAgent Logo (Logo-CaveAgent.png) centered at top
-- Title: "CaveAgent: Transforming LLMs into Stateful Runtime Operators"
+- PyCallingAgent Logo (Logo-PyCallingAgent.png) centered at top
+- Title: "PyCallingAgent: Transforming LLMs into Stateful Runtime Operators"
 - Tagline: "From text-in-text-out to (text&object)-in-(text&object)-out"
 - Author list with personal page links (* equal contribution, dagger corresponding)
 - Institution logo row: HKUST, HKBU, NUS, HKU, CMU, NTU, Imperial, Princeton, UNC, Harvard
@@ -41,7 +41,7 @@
 
 ### Section 3: Interactive Dual-Stream Animation (Feature Interaction 1)
 
-- Title: "How CaveAgent Works"
+- Title: "How PyCallingAgent Works"
 - Step-by-step animated walkthrough based on framework.png logic:
   - **Step 1** — Runtime Initialization: code block fades in showing `PythonRuntime(variables=[...], functions=[...])`, arrow animates toward Runtime Stream
   - **Step 2** — User Query -> Semantic Stream: user input appears, LLM reasoning highlighted
@@ -75,7 +75,7 @@
 - Title: "Experimental Results"
 - Tab bar: `Tau2-Bench Results` | `Token Efficiency` | `Type Proficiency` | `Multi-Turn Analysis`
 - Tab contents:
-  - **Tau2-Bench**: HTML table reproducing main_table data (CaveAgent rows highlighted blue), showing +10.5% success rate
+  - **Tau2-Bench**: HTML table reproducing main_table data (PyCallingAgent rows highlighted blue), showing +10.5% success rate
   - **Token Efficiency**: `token_consumption.pdf` converted to PNG + key metric description (28.4% reduction)
   - **Type Proficiency**: `type_proficiency_multi_radar.pdf` converted to PNG radar chart
   - **Multi-Turn**: `multi_turn_bar.pdf` converted to PNG bar chart
@@ -84,7 +84,7 @@
 ### Section 7: Code Quick Start
 
 - Title: "Get Started"
-- Install command: `pip install 'cave-agent[all]'` with copy button
+- Install command: `pip install 'pycallingagent[all]'` with copy button
 - Hello World code block (from README) with Prism.js Python syntax highlighting
 - Bottom link buttons: `Full Documentation` -> GitHub README | `PyPI` -> PyPI page
 
@@ -106,15 +106,15 @@ Website/
 │   │   ├── bulma-carousel.min.css
 │   │   ├── bulma-slider.min.css
 │   │   ├── index.css            # Template base styles
-│   │   └── caveagent.css        # Custom CaveAgent styles (animations, tabs, walkthrough)
+│   │   └── pycallingagent.css        # Custom PyCallingAgent styles (animations, tabs, walkthrough)
 │   ├── js/
 │   │   ├── index.js             # Template base JS
 │   │   ├── bulma-carousel.min.js
 │   │   ├── bulma-slider.min.js
 │   │   ├── prism.min.js         # Code highlighting
-│   │   └── caveagent.js         # Custom interactions (dual-stream animation, smart home walkthrough, tabs)
+│   │   └── pycallingagent.js         # Custom interactions (dual-stream animation, smart home walkthrough, tabs)
 │   ├── images/
-│   │   ├── logo.png             # CaveAgent logo
+│   │   ├── logo.png             # PyCallingAgent logo
 │   │   ├── framework.png        # Dual-stream architecture (teaser)
 │   │   ├── smarthome.png        # Smart home demo
 │   │   ├── town_simulation.png
@@ -143,13 +143,13 @@ Maohao Ran*1,2, Zhenglin Wan*1,3, Cooper Lin4, Yanting Zhang1, Hongyu Xin1, Hong
 
 ### Links
 - arXiv: https://arxiv.org/abs/2601.01569
-- GitHub: https://github.com/acodercat/cave-agent
-- PyPI: https://pypi.org/project/cave-agent
+- GitHub: https://github.com/vanzll/PyAgent
+- PyPI: https://pypi.org/project/pycallingagent
 
 ### BibTeX
 ```bibtex
-@article{ran2026caveagent,
-  title={CaveAgent: Transforming LLMs into Stateful Runtime Operators},
+@article{ran2026pycallingagent,
+  title={PyCallingAgent: Transforming LLMs into Stateful Runtime Operators},
   author={Ran, Maohao and Wan, Zhenglin and Lin, Cooper and Zhang, Yanting and others},
   journal={arXiv preprint arXiv:2601.01569},
   year={2026}

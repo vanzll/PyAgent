@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from cave_agent.webapp.__main__ import get_server_config
+from pycallingagent.webapp.__main__ import get_server_config
 
 
 def test_get_server_config_uses_defaults(monkeypatch) -> None:

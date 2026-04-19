@@ -1,7 +1,7 @@
 """Timeout demo — test execution timeout with both runtimes.
 
 Usage:
-    cd cave-agent && uv run python examples/timeout_demo.py
+    cd pycallingagent && uv run python examples/timeout_demo.py
 """
 
 import asyncio
@@ -10,10 +10,10 @@ import os
 from rich.console import Console
 from rich.rule import Rule
 
-from cave_agent import CaveAgent, Function, IPythonRuntime
-from cave_agent.runtime import IPyKernelRuntime
-from cave_agent.models.openai import OpenAIServerModel
-from cave_agent.display import render_user_prompt
+from pycallingagent import PyCallingAgent, Function, IPythonRuntime
+from pycallingagent.runtime import IPyKernelRuntime
+from pycallingagent.models.openai import OpenAIServerModel
+from pycallingagent.display import render_user_prompt
 
 console = Console()
 
@@ -39,7 +39,7 @@ async def main():
     console.print()
     console.print(Rule("[bold]IPythonRuntime (in-process)[/]", style="dim"))
 
-    agent = CaveAgent(
+    agent = PyCallingAgent(
         model=model,
         runtime=IPythonRuntime(functions=[Function(slow_compute)]),
         max_exec_timeout=5,
@@ -54,7 +54,7 @@ async def main():
     console.print(Rule("[bold]IPyKernelRuntime (isolated process)[/]", style="dim"))
 
     async with IPyKernelRuntime(functions=[Function(slow_compute)]) as runtime:
-        agent = CaveAgent(
+        agent = PyCallingAgent(
             model=model,
             runtime=runtime,
             max_exec_timeout=5,

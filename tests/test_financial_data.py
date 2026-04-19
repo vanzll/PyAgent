@@ -6,16 +6,16 @@ import httpx
 import pandas as pd
 import pytest
 
-import cave_agent.webapp.agent_runner as agent_runner_module
-from cave_agent.webapp.financial_data import (
+import pycallingagent.webapp.agent_runner as agent_runner_module
+from pycallingagent.webapp.financial_data import (
     AlphaVantageClient,
     DemoFinancialDataProvider,
     FinancialDataProvider,
     FredClient,
     SecEdgarClient,
 )
-from cave_agent.webapp.agent_runner import FinancialResearchRunner
-from cave_agent.webapp.service import ParsedInputBundle
+from pycallingagent.webapp.agent_runner import FinancialResearchRunner
+from pycallingagent.webapp.service import ParsedInputBundle
 
 
 @pytest.mark.asyncio
@@ -124,7 +124,7 @@ async def test_sec_client_parses_companyfacts_and_submissions() -> None:
         raise AssertionError(f"Unexpected URL: {url}")
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://data.sec.gov") as client:
-        sec = SecEdgarClient(http_client=client, user_agent="cave-agent-tests")
+        sec = SecEdgarClient(http_client=client, user_agent="pycallingagent-tests")
         profile = await sec.fetch_company_profile("AAPL")
 
     assert profile["ticker"] == "AAPL"
@@ -163,7 +163,7 @@ async def test_sec_client_tolerates_missing_companyfacts() -> None:
         raise AssertionError(f"Unexpected URL: {url}")
 
     async with httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://data.sec.gov") as client:
-        sec = SecEdgarClient(http_client=client, user_agent="cave-agent-tests")
+        sec = SecEdgarClient(http_client=client, user_agent="pycallingagent-tests")
         profile = await sec.fetch_company_profile("SPY")
 
     assert profile["ticker"] == "SPY"
@@ -574,7 +574,7 @@ async def test_financial_research_runner_falls_back_when_agent_times_out(tmp_pat
         async def run(self, *_args, **_kwargs):
             await asyncio.sleep(0.2)
 
-    monkeypatch.setattr(agent_runner_module, "CaveAgent", HangingAgent)
+    monkeypatch.setattr(agent_runner_module, "PyCallingAgent", HangingAgent)
 
     events = []
     runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
@@ -648,7 +648,7 @@ async def test_financial_research_runner_timeout_clears_partial_outputs(tmp_path
             workspace.save_dataframe(pd.DataFrame([{"x": 1}]), "partial", format="csv")
             await asyncio.sleep(0.2)
 
-    monkeypatch.setattr(agent_runner_module, "CaveAgent", HangingAgent)
+    monkeypatch.setattr(agent_runner_module, "PyCallingAgent", HangingAgent)
 
     runner = FinancialResearchRunner(provider=DemoFinancialDataProvider())
     result = await runner.run(

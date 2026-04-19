@@ -16,7 +16,7 @@ prs = Presentation()
 prs.slide_width = Inches(13.333)
 prs.slide_height = Inches(7.5)
 prs.core_properties.author = "Zhenglin Wan"
-prs.core_properties.title = "CaveAgent Research Desk"
+prs.core_properties.title = "PyCallingAgent Research Desk"
 prs.core_properties.subject = "Financial research agent for CS5260"
 
 TITLE_FONT = "Georgia"
@@ -146,7 +146,7 @@ def build_title_slide() -> None:
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide, COLORS["navy"])
     add_pill(slide, 0.55, 0.62, 2.4, "NUS CS5260 FINAL PROJECT", COLORS["gold"], COLORS["ink"])
-    add_text(slide, 0.55, 1.45, 8.2, 0.6, "CaveAgent Research Desk", font_name=TITLE_FONT, size=31, color=COLORS["white"], bold=True)
+    add_text(slide, 0.55, 1.45, 8.2, 0.6, "PyCallingAgent Research Desk", font_name=TITLE_FONT, size=31, color=COLORS["white"], bold=True)
     add_text(slide, 0.55, 2.2, 7.8, 0.26, "A public financial research agent for U.S. stocks and ETFs", size=15, color=RGBColor(0xD7, 0xDF, 0xEC))
     add_text(
         slide,
@@ -154,7 +154,7 @@ def build_title_slide() -> None:
         3.0,
         6.1,
         1.2,
-        "The product accepts tickers and a research question, then fetches public market data, filing-backed facts, comparison tables, and chart artifacts through a CaveAgent-powered runtime.",
+        "The product accepts tickers and a research question, then fetches public market data, filing-backed facts, comparison tables, and chart artifacts through a PyCallingAgent-powered runtime.",
         size=17,
         color=COLORS["cream"],
     )
@@ -283,7 +283,7 @@ def build_overview_slide() -> None:
 def build_architecture_slide() -> None:
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide, COLORS["cream"])
-    add_title(slide, "System architecture", "Structured data providers on the outside, CaveAgent runtime in the middle.")
+    add_title(slide, "System architecture", "Structured data providers on the outside, PyCallingAgent runtime in the middle.")
 
     add_card(slide, 0.78, 1.78, 2.25, 4.7, COLORS["white"])
     add_pill(slide, 1.0, 2.02, 1.56, "DATA PROVIDERS", COLORS["blue_bg"], COLORS["blue"])
@@ -301,7 +301,7 @@ def build_architecture_slide() -> None:
     add_text(slide, 3.24, 3.74, 0.4, 0.24, "→", size=26, color=COLORS["gold"], bold=True)
 
     add_card(slide, 3.72, 1.78, 5.24, 4.7, COLORS["navy_soft"])
-    add_pill(slide, 4.02, 2.02, 1.9, "CAVEAGENT RUNTIME", RGBColor(0x24, 0x3A, 0x60), COLORS["gold_soft"])
+    add_pill(slide, 4.02, 2.02, 1.9, "PYCALLINGAGENT RUNTIME", RGBColor(0x24, 0x3A, 0x60), COLORS["gold_soft"])
     add_text(slide, 4.02, 2.46, 3.8, 0.24, "Unified research workspace", font_name=TITLE_FONT, size=18, color=COLORS["white"], bold=True)
     add_text(
         slide,
@@ -464,7 +464,7 @@ def build_closing_slide() -> None:
 
     add_card(slide, 9.28, 1.86, 3.22, 4.7, RGBColor(0x13, 0x27, 0x40))
     add_text(slide, 9.54, 2.18, 2.1, 0.24, "Takeaway", font_name=TITLE_FONT, size=20, color=COLORS["white"], bold=True)
-    add_text(slide, 9.54, 2.72, 2.48, 1.04, "CaveAgent Research Desk turns a vague finance question into a grounded research packet in one run.", size=15, color=RGBColor(0xE2, 0xEA, 0xF7))
+    add_text(slide, 9.54, 2.72, 2.48, 1.04, "PyCallingAgent Research Desk turns a vague finance question into a grounded research packet in one run.", size=15, color=RGBColor(0xE2, 0xEA, 0xF7))
     add_text(slide, 9.54, 4.18, 2.5, 0.26, "For research use only. Not investment advice.", size=13, color=COLORS["gold_soft"], bold=True)
     add_text(slide, 9.54, 5.1, 2.5, 0.5, "Public URL placeholder:\nhttps://your-deployment-url", size=11, color=RGBColor(0xC9, 0xD3, 0xE3))
     add_footer(slide, "This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.", dark=True)

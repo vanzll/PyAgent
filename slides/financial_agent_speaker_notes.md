@@ -1,4 +1,4 @@
-# CaveAgent Research Desk Speaker Notes
+# PyCallingAgent Research Desk Speaker Notes
 
 ## Slide 1: Title
 
@@ -29,7 +29,7 @@
 这一页解释输入和输出：
 
 - 输入是 `tickers + natural language question`
-- 中间是 CaveAgent runtime 和 finance skills
+- 中间是 PyCallingAgent runtime 和 finance skills
 - 输出固定为三类 artifact：
   - markdown brief
   - comparison table
@@ -47,7 +47,7 @@
 
 - 外层是结构化数据 provider：Alpha Vantage、SEC EDGAR、FRED
 - 中间是 normalization layer，把不同数据源统一成 runtime objects
-- 然后 CaveAgent 调用 skills，例如 market-data、fundamentals、comparison、charting
+- 然后 PyCallingAgent 调用 skills，例如 market-data、fundamentals、comparison、charting
 - 最后前端通过 SSE 实时显示执行过程和结果
 
 一句话总结：

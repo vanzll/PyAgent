@@ -1,6 +1,6 @@
-from cave_agent import CaveAgent
-from cave_agent.models import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.models import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Variable
 import os
 import asyncio
 
@@ -38,7 +38,7 @@ async def main():
     )
     
     # Create agent
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     
     # Sort numbers and get result
     await agent.run("Sort the numbers list")

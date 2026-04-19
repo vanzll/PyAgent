@@ -1,9 +1,9 @@
 """Integration tests for max_tokens output recovery with real API calls."""
 
 import pytest
-from cave_agent import CaveAgent
-from cave_agent.models import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Function, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.models import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Function, Variable
 import os
 
 
@@ -34,7 +34,7 @@ def recovery_agent(small_output_model):
             Variable(name="summary", description="Store final summary here"),
         ],
     )
-    return CaveAgent(
+    return PyCallingAgent(
         small_output_model,
         runtime=runtime,
         display=False,

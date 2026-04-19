@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PyCallingAgent Financial Research Agent</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <main class="shell shell-simple">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">NUS CS5260 Course Project</p>
+        <p class="topbar-title">Financial Research Agent</p>
+      </div>
+      <div class="topbar-tags">
+        {% if demo_mode %}
+        <span class="topbar-tag topbar-tag-live">Demo mode</span>
+        {% else %}
+        <span class="topbar-tag topbar-tag-live">Public Data Mode</span>
+        {% endif %}
+      </div>
+    </header>
+
+    <section class="simple-hero">
+      <p class="eyebrow">Prompt-First Workflow</p>
+      <h1>Ask the agent with one prompt.</h1>
+      <p class="lede">
+        Enter one financial research prompt. The agent infers the target company or market, replies in plain English,
+        and generates charts, tables, and downloadable outputs when needed.
+      </p>
+      <p class="course-statement">
+        This public-facing agent product is entirely derived from work conducted as part of the NUS CS5260 course.
+      </p>
+    </section>
+
+    <section class="simple-layout">
+      <section class="chat-panel simple-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Prompt</p>
+            <h2>Ask one research question</h2>
+          </div>
+          <button id="new-session-button" type="button" class="secondary-btn">New Session</button>
+        </div>
+
+        <form id="chat-form" class="composer">
+          <label class="field-label" for="prompt">Prompt</label>
+          <textarea id="prompt" name="prompt" rows="5" placeholder="Compare AMD and Nvidia on valuation, latest fundamentals, and recent performance." required></textarea>
+
+          <div class="quick-prompts">
+            <button type="button" class="prompt-chip" data-prompt="Summarize Apple and show the recent price trend.">Apple brief</button>
+            <button type="button" class="prompt-chip" data-prompt="Compare AMD and Nvidia on valuation, growth, and recent performance.">AMD vs Nvidia</button>
+            <button type="button" class="prompt-chip" data-prompt="Give me a market snapshot for the US equity market and highlight the main risks.">US market snapshot</button>
+          </div>
+
+          <div class="composer-actions">
+            <p class="disclaimer">For research use only. Not investment advice.</p>
+            <button id="submit-button" type="submit" class="primary-btn">Send</button>
+          </div>
+        </form>
+
+        <div class="thread-shell">
+          <div class="thread-meta">
+            <span>Session</span>
+            <strong id="session-id-label">starting…</strong>
+          </div>
+          <div id="chat-thread" class="chat-thread compact-thread"></div>
+        </div>
+      </section>
+
+      <aside class="workspace-panel simple-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Results</p>
+            <h2>Answer and outputs</h2>
+          </div>
+          <span id="status-pill" class="status-pill idle">idle</span>
+        </div>
+
+        <section class="workspace-block">
+          <h3>Assistant Answer</h3>
+          <div id="summary-text" class="summary-block">No answer yet.</div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Live Status</h3>
+          <div id="event-log" class="event-log"></div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Charts</h3>
+          <div id="chart-previews" class="chart-grid"></div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Tables</h3>
+          <div id="table-previews" class="preview-grid"></div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Artifacts</h3>
+          <div id="artifacts" class="artifact-list"></div>
+        </section>
+
+        <section class="workspace-block">
+          <h3>Key Metrics</h3>
+          <div id="snapshot-cards" class="snapshot-grid"></div>
+        </section>
+
+        <div class="sources-note">
+          <span>Yahoo Finance</span>
+          <span>SEC EDGAR</span>
+          <span>Stable Fallback</span>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

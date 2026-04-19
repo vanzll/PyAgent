@@ -235,7 +235,7 @@ def build_design_principles_slide():
 def build_architecture_slide():
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_background(slide, COLORS["paper"])
-    add_title(slide, "Agent architecture", "A thin web product on top of CaveAgent runtime and skills.")
+    add_title(slide, "Agent architecture", "A thin web product on top of PyCallingAgent runtime and skills.")
 
     add_card(slide, 0.8, 2.0, 2.0, 1.24, COLORS["white"], COLORS["line"])
     add_text(slide, 1.05, 2.28, 1.5, 0.22, "Browser UI", font_name=TITLE_FONT, size=18, bold=True)
@@ -333,7 +333,7 @@ def build_deployment_slide():
         3.2,
         [
             "Build: `pip install \".[openai,webapp]\"`",
-            "Start: `python -m uvicorn cave_agent.webapp.app:create_app --factory --host 0.0.0.0 --port $PORT`",
+            "Start: `python -m uvicorn pycallingagent.webapp.app:create_app --factory --host 0.0.0.0 --port $PORT`",
             "Public URL comes from Render, no custom domain required",
         ],
         size=13,

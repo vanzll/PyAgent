@@ -4,9 +4,9 @@ import time
 from pathlib import Path
 
 from fastapi.testclient import TestClient
-from cave_agent.webapp.app import create_app
-from cave_agent.webapp.models import ArtifactRecord, RunResult
-from cave_agent.webapp.service import ParsedInputBundle, RunService
+from pycallingagent.webapp.app import create_app
+from pycallingagent.webapp.models import ArtifactRecord, RunResult
+from pycallingagent.webapp.service import ParsedInputBundle, RunService
 
 
 class FakeRunner:

@@ -1,9 +1,9 @@
 import asyncio
 import os
 from pathlib import Path
-from cave_agent import CaveAgent
-from cave_agent.skills import SkillDiscovery
-from cave_agent.models import LiteLLMModel
+from pycallingagent import PyCallingAgent
+from pycallingagent.skills import SkillDiscovery
+from pycallingagent.models import LiteLLMModel
 
 
 async def main():
@@ -19,7 +19,7 @@ async def main():
 
     print("=== Smart Home Assistant ===\n")
 
-    agent = CaveAgent(model=model, skills=skills)
+    agent = PyCallingAgent(model=model, skills=skills)
 
     print("Available skills:")
     for skill in agent._skill_registry.list_skills():

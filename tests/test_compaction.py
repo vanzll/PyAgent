@@ -2,7 +2,7 @@
 
 import pytest
 
-from cave_agent.types import (
+from pycallingagent.types import (
     AssistantMessage,
     ExecutionResultMessage,
     Message,
@@ -10,13 +10,13 @@ from cave_agent.types import (
     SystemMessage,
     UserMessage,
 )
-from cave_agent.compaction import CompactionState, compact_if_needed
-from cave_agent.compaction.prompts import (
+from pycallingagent.compaction import CompactionState, compact_if_needed
+from pycallingagent.compaction.prompts import (
     MICROCOMPACT_PLACEHOLDER,
     extract_summary,
     format_transcript,
 )
-from cave_agent.compaction.strategies import (
+from pycallingagent.compaction.strategies import (
     KEEP_RECENT_EXECUTION_RESULTS,
     MAX_CONSECUTIVE_FAILURES,
     MIN_KEEP_MESSAGES,
@@ -24,14 +24,14 @@ from cave_agent.compaction.strategies import (
     microcompact,
     trim_fallback,
 )
-from cave_agent.compaction.tokens import (
+from pycallingagent.compaction.tokens import (
     CHARS_PER_TOKEN,
     COMPACT_BUFFER_TOKENS,
     OUTPUT_TOKENS_RESERVE,
     compact_threshold,
     estimate_tokens,
 )
-from cave_agent.models.base import Model, ModelResponse, StreamResponse, TokenUsage
+from pycallingagent.models.base import Model, ModelResponse, StreamResponse, TokenUsage
 
 
 # ---------------------------------------------------------------------------

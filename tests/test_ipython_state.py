@@ -1,6 +1,6 @@
 import pytest
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPythonRuntime, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import IPythonRuntime, Variable
 
 @pytest.fixture
 def numbers():
@@ -30,7 +30,7 @@ def state_agent(model, numbers):
         variables=[numbers_var, sorted_numbers_var, sum_result_var]
     )
     
-    return CaveAgent(
+    return PyCallingAgent(
         model,
         runtime=runtime
     )

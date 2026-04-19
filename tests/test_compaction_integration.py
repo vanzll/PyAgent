@@ -1,8 +1,8 @@
 """Integration tests for context compaction with real API calls."""
 
 import pytest
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPythonRuntime, Function, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import IPythonRuntime, Function, Variable
 
 
 def analyze(data: list) -> dict:
@@ -29,7 +29,7 @@ def compaction_agent(model):
             Variable(name="result", description="Store analysis results here"),
         ],
     )
-    return CaveAgent(
+    return PyCallingAgent(
         model,
         runtime=runtime,
         context_window=5_000,

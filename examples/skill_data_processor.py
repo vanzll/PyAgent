@@ -2,9 +2,9 @@ import asyncio
 import os
 from pathlib import Path
 
-from cave_agent import CaveAgent
-from cave_agent.skills import SkillDiscovery
-from cave_agent.models import LiteLLMModel
+from pycallingagent import PyCallingAgent
+from pycallingagent.skills import SkillDiscovery
+from pycallingagent.models import LiteLLMModel
 
 
 async def main():
@@ -23,7 +23,7 @@ async def main():
     print("=== Sales Analysis Assistant ===\n")
 
     # Create agent with skills
-    agent = CaveAgent(model=model, skills=skills)
+    agent = PyCallingAgent(model=model, skills=skills)
 
     # Show available skills
     print("Available skills:")

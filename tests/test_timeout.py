@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from cave_agent.agent import CaveAgent, _ExecutionContext
-from cave_agent.types import EventType
-from cave_agent.runtime.executor import ExecutionResult
+from pycallingagent.agent import PyCallingAgent, _ExecutionContext
+from pycallingagent.types import EventType
+from pycallingagent.runtime.executor import ExecutionResult
 
 
 class MockRuntime:
@@ -68,9 +68,9 @@ class MockStreamResponse:
         return chunk
 
 
-def _make_agent(runtime_delay: float, timeout: float | None) -> CaveAgent:
+def _make_agent(runtime_delay: float, timeout: float | None) -> PyCallingAgent:
     """Create an agent with mocked runtime and model."""
-    agent = CaveAgent.__new__(CaveAgent)
+    agent = PyCallingAgent.__new__(PyCallingAgent)
     agent.model = MockModel("import time; time.sleep(999)")
     agent.runtime = MockRuntime(delay=runtime_delay)
     agent.max_steps = 3

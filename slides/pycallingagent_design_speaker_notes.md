@@ -7,7 +7,7 @@ PyCallingAgent is our CS5260 final project. The product goal is simple: make a f
 The design starts from four principles. First, prompt-first interaction: the user should not need to fill a complicated form. Second, artifact-oriented behavior: a useful agent should produce work products, not only text. Third, public-data grounding: the response should rely on real financial context. Fourth, resilience: the product must still look good even when free APIs become unreliable.
 
 ## Slide 3
-The architecture is intentionally thin. The browser talks to a FastAPI service. The service manages sessions, runs, SSE events, and artifact downloads. The core runner prepares market data, injects structured variables into the CaveAgent runtime, and lets the model use skills. The data layer is separate, so we can swap live data, public-data mode, and stable fallbacks without changing the product UI.
+The architecture is intentionally thin. The browser talks to a FastAPI service. The service manages sessions, runs, SSE events, and artifact downloads. The core runner prepares market data, injects structured variables into the PyCallingAgent runtime, and lets the model use skills. The data layer is separate, so we can swap live data, public-data mode, and stable fallbacks without changing the product UI.
 
 ## Slide 4
 The execution flow is what makes this feel like an agent. After the user sends a prompt, the system infers the target ticker or market proxy, loads public data, runs the agent on normalized runtime objects, materializes outputs, and streams status back to the page. This keeps the interaction close to Manus-style products while staying simple enough for a class project.

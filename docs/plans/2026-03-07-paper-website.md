@@ -1,8 +1,8 @@
-# CaveAgent Paper Website Implementation Plan
+# PyCallingAgent Paper Website Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build an interactive academic project website for the CaveAgent paper using the Academic Project Page Template with enhanced interactions.
+**Goal:** Build an interactive academic project website for the PyCallingAgent paper using the Academic Project Page Template with enhanced interactions.
 
 **Architecture:** Static HTML site based on the Academic Project Page Template (Bulma CSS). Custom CSS and vanilla JS add interactive elements: a dual-stream step-by-step animation, a smart home walkthrough with animated device cards, and tabbed experiment results. All assets are static; PDF figures are pre-converted to PNG.
 
@@ -14,14 +14,14 @@
 
 **Files:**
 - Create: `Website/index.html` (empty placeholder)
-- Create: `Website/static/css/caveagent.css` (empty)
-- Create: `Website/static/js/caveagent.js` (empty)
+- Create: `Website/static/css/pycallingagent.css` (empty)
+- Create: `Website/static/js/pycallingagent.js` (empty)
 - Create: `Website/.nojekyll`
 
 **Step 1: Download template static assets into Website/static/**
 
 ```bash
-cd /mnt/data/wanzl/cave-agent
+cd /mnt/data/wanzl/pycallingagent
 mkdir -p Website/static/{css,js,images,images/institution_logos}
 
 # Download Bulma and template CSS/JS from the Academic Project Page Template repo
@@ -41,39 +41,39 @@ curl -sL "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-p
 curl -sL "https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" -o Website/static/css/prism-tomorrow.min.css
 
 # Create empty custom files
-touch Website/static/css/caveagent.css
-touch Website/static/js/caveagent.js
+touch Website/static/css/pycallingagent.css
+touch Website/static/js/pycallingagent.js
 touch Website/.nojekyll
 ```
 
 **Step 2: Copy images from paper figures into Website/static/images/**
 
 ```bash
-cd /mnt/data/wanzl/cave-agent
+cd /mnt/data/wanzl/pycallingagent
 
 # Copy PNG figures
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/Logo-CaveAgent.png Website/static/images/logo.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/framework.png Website/static/images/framework.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/smarthome.png Website/static/images/smarthome.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/town_simulation.png Website/static/images/town_simulation.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/downstream_applications.png Website/static/images/downstream_applications.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/v2_new_elements/Skills.png Website/static/images/skills.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/v2_new_elements/AutoML.png Website/static/images/automl.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/v2_new_elements/Geospacial_Analysis.png Website/static/images/geospatial.png
-cp Website/Cave_agent_overleaf_src/figures/CaveAgent/evolve.png Website/static/images/evolve.png
+cp Website/overleaf_src/figures/PyCallingAgent/Logo-PyCallingAgent.png Website/static/images/logo.png
+cp Website/overleaf_src/figures/PyCallingAgent/framework.png Website/static/images/framework.png
+cp Website/overleaf_src/figures/PyCallingAgent/smarthome.png Website/static/images/smarthome.png
+cp Website/overleaf_src/figures/PyCallingAgent/town_simulation.png Website/static/images/town_simulation.png
+cp Website/overleaf_src/figures/PyCallingAgent/downstream_applications.png Website/static/images/downstream_applications.png
+cp Website/overleaf_src/figures/PyCallingAgent/v2_new_elements/Skills.png Website/static/images/skills.png
+cp Website/overleaf_src/figures/PyCallingAgent/v2_new_elements/AutoML.png Website/static/images/automl.png
+cp Website/overleaf_src/figures/PyCallingAgent/v2_new_elements/Geospacial_Analysis.png Website/static/images/geospatial.png
+cp Website/overleaf_src/figures/PyCallingAgent/evolve.png Website/static/images/evolve.png
 
 # Copy institution logos
-cp Website/Cave_agent_overleaf_src/figures/hkbu_logo.png Website/static/images/institution_logos/
-cp Website/Cave_agent_overleaf_src/figures/hkgai_logo.png Website/static/images/institution_logos/
-cp Website/Cave_agent_overleaf_src/figures/hku_logo.png Website/static/images/institution_logos/
-cp Website/Cave_agent_overleaf_src/figures/ntu_logo_color.png Website/static/images/institution_logos/
-cp Website/Cave_agent_overleaf_src/figures/nus_logo.png Website/static/images/institution_logos/
+cp Website/overleaf_src/figures/hkbu_logo.png Website/static/images/institution_logos/
+cp Website/overleaf_src/figures/hkgai_logo.png Website/static/images/institution_logos/
+cp Website/overleaf_src/figures/hku_logo.png Website/static/images/institution_logos/
+cp Website/overleaf_src/figures/ntu_logo_color.png Website/static/images/institution_logos/
+cp Website/overleaf_src/figures/nus_logo.png Website/static/images/institution_logos/
 
 # Convert PDF figures to PNG (requires pdftoppm or similar)
 # If pdftoppm is available:
 for pdf in token_consumption steps_success multi_turn_bar type_proficiency_multi_radar benchmark_combined vars_count_heatmap; do
   pdftoppm -png -r 300 -singlefile \
-    "Website/Cave_agent_overleaf_src/figures/CaveAgent/${pdf}.pdf" \
+    "Website/overleaf_src/figures/PyCallingAgent/${pdf}.pdf" \
     "Website/static/images/${pdf}" 2>/dev/null || echo "SKIP: ${pdf}.pdf (pdftoppm not available, convert manually)"
 done
 ```
@@ -113,26 +113,26 @@ Write `Website/index.html` with the following structure. This is the largest sin
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="title" content="CaveAgent: Transforming LLMs into Stateful Runtime Operators">
-  <meta name="description" content="CaveAgent introduces Stateful Runtime Management for LLM agents, achieving +10.5% success rate and 28.4% token reduction through persistent Python runtime with direct variable injection and retrieval.">
-  <meta name="keywords" content="LLM, agent, function calling, stateful runtime, code generation, tool use, CaveAgent">
+  <meta name="title" content="PyCallingAgent: Transforming LLMs into Stateful Runtime Operators">
+  <meta name="description" content="PyCallingAgent introduces Stateful Runtime Management for LLM agents, achieving +10.5% success rate and 28.4% token reduction through persistent Python runtime with direct variable injection and retrieval.">
+  <meta name="keywords" content="LLM, agent, function calling, stateful runtime, code generation, tool use, PyCallingAgent">
   <meta name="author" content="Maohao Ran, Zhenglin Wan, Cooper Lin, Yanting Zhang">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="CaveAgent: Transforming LLMs into Stateful Runtime Operators">
-  <meta property="og:description" content="CaveAgent shifts LLM tool use from text-generator to runtime-operator with persistent Python environments.">
+  <meta property="og:title" content="PyCallingAgent: Transforming LLMs into Stateful Runtime Operators">
+  <meta property="og:description" content="PyCallingAgent shifts LLM tool use from text-generator to runtime-operator with persistent Python environments.">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="citation_title" content="CaveAgent: Transforming LLMs into Stateful Runtime Operators">
+  <meta name="citation_title" content="PyCallingAgent: Transforming LLMs into Stateful Runtime Operators">
   <meta name="citation_author" content="Ran, Maohao">
   <meta name="citation_author" content="Wan, Zhenglin">
   <meta name="citation_publication_date" content="2026">
   <meta name="citation_pdf_url" content="https://arxiv.org/pdf/2601.01569.pdf">
 
-  <title>CaveAgent: Transforming LLMs into Stateful Runtime Operators</title>
+  <title>PyCallingAgent: Transforming LLMs into Stateful Runtime Operators</title>
 
   <link rel="icon" type="image/png" href="static/images/logo.png">
   <link rel="stylesheet" href="static/css/bulma.min.css">
   <link rel="stylesheet" href="static/css/index.css">
-  <link rel="stylesheet" href="static/css/caveagent.css">
+  <link rel="stylesheet" href="static/css/pycallingagent.css">
   <link rel="preload" href="static/css/bulma-carousel.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="static/css/bulma-slider.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
   <link rel="preload" href="static/css/fontawesome.all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -153,7 +153,7 @@ Write `Website/index.html` with the following structure. This is the largest sin
   <script defer src="static/js/prism.min.js"></script>
   <script defer src="static/js/prism-python.min.js"></script>
   <script defer src="static/js/index.js"></script>
-  <script defer src="static/js/caveagent.js"></script>
+  <script defer src="static/js/pycallingagent.js"></script>
 </head>
 <body>
 
@@ -165,10 +165,10 @@ Write `Website/index.html` with the following structure. This is the largest sin
         <div class="column has-text-centered">
           <!-- Logo -->
           <div class="publication-logo">
-            <img src="static/images/logo.png" alt="CaveAgent Logo" style="max-height: 120px; margin-bottom: 1rem;">
+            <img src="static/images/logo.png" alt="PyCallingAgent Logo" style="max-height: 120px; margin-bottom: 1rem;">
           </div>
 
-          <h1 class="title is-1 publication-title">CaveAgent: Transforming LLMs into Stateful Runtime Operators</h1>
+          <h1 class="title is-1 publication-title">PyCallingAgent: Transforming LLMs into Stateful Runtime Operators</h1>
 
           <p class="subtitle is-4" style="margin-bottom: 1.5rem; color: #666; font-style: italic;">
             "From text-in-text-out to (text&amp;object)-in-(text&amp;object)-out"
@@ -237,7 +237,7 @@ Write `Website/index.html` with the following structure. This is the largest sin
                 </a>
               </span>
               <span class="link-block">
-                <a href="https://github.com/acodercat/cave-agent" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                <a href="https://github.com/vanzll/PyAgent" target="_blank" class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fab fa-github"></i></span>
                   <span>Code</span>
                 </a>
@@ -249,7 +249,7 @@ Write `Website/index.html` with the following structure. This is the largest sin
                 </a>
               </span>
               <span class="link-block">
-                <a href="https://pypi.org/project/cave-agent" target="_blank" class="external-link button is-normal is-rounded is-dark">
+                <a href="https://pypi.org/project/pycallingagent" target="_blank" class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="fas fa-cube"></i></span>
                   <span>PyPI</span>
                 </a>
@@ -266,9 +266,9 @@ Write `Website/index.html` with the following structure. This is the largest sin
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
-      <img src="static/images/framework.png" alt="CaveAgent Dual-Stream Architecture" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
+      <img src="static/images/framework.png" alt="PyCallingAgent Dual-Stream Architecture" style="width: 100%; border: 1px solid #ddd; border-radius: 4px;">
       <h2 class="subtitle has-text-centered" style="margin-top: 1rem;">
-        <strong>CaveAgent Dual-Stream Architecture:</strong> Semantic Stream for lightweight reasoning, Runtime Stream for persistent state &amp; data management.
+        <strong>PyCallingAgent Dual-Stream Architecture:</strong> Semantic Stream for lightweight reasoning, Runtime Stream for persistent state &amp; data management.
       </h2>
     </div>
   </div>
@@ -281,10 +281,10 @@ Write `Website/index.html` with the following structure. This is the largest sin
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            LLM-based agents are increasingly capable of complex task execution, yet current agentic systems remain constrained by text-centric paradigms that struggle with long-horizon tasks due to fragile multi-turn dependencies and context drift. We present <strong>CaveAgent</strong>, a framework that shifts LLM tool use from "LLM-as-Text-Generator" to "LLM-as-Runtime-Operator." CaveAgent introduces a dual-stream architecture: a <em>semantic stream</em> for lightweight reasoning and a <em>runtime stream</em> backed by a persistent Python environment for stateful execution.
+            LLM-based agents are increasingly capable of complex task execution, yet current agentic systems remain constrained by text-centric paradigms that struggle with long-horizon tasks due to fragile multi-turn dependencies and context drift. We present <strong>PyCallingAgent</strong>, a framework that shifts LLM tool use from "LLM-as-Text-Generator" to "LLM-as-Runtime-Operator." PyCallingAgent introduces a dual-stream architecture: a <em>semantic stream</em> for lightweight reasoning and a <em>runtime stream</em> backed by a persistent Python environment for stateful execution.
           </p>
           <p>
-            Rather than treating the LLM's text context as the primary workspace, CaveAgent elevates the persistent runtime as the central locus. Beyond leveraging code generation to resolve interdependent sub-tasks in a single step, CaveAgent introduces <strong>Stateful Runtime Management</strong>: it injects, manipulates, and retrieves complex Python objects (e.g., DataFrames, database connections) that persist across turns. CaveAgent further provides a runtime-integrated skill management system that extends the Agent Skills open standard.
+            Rather than treating the LLM's text context as the primary workspace, PyCallingAgent elevates the persistent runtime as the central locus. Beyond leveraging code generation to resolve interdependent sub-tasks in a single step, PyCallingAgent introduces <strong>Stateful Runtime Management</strong>: it injects, manipulates, and retrieves complex Python objects (e.g., DataFrames, database connections) that persist across turns. PyCallingAgent further provides a runtime-integrated skill management system that extends the Agent Skills open standard.
           </p>
           <p>
             Evaluations on Tau<sup>2</sup>-bench and BFCL across six SOTA LLMs demonstrate consistent improvements: <strong>+10.5% success rate</strong> on retail tasks, <strong>28.4% reduction</strong> in total token consumption, and <strong>59% token reduction</strong> on data-intensive tasks. The accessible runtime state further provides programmatically verifiable feedback, enabling automated evaluation and reward signal generation for Reinforcement Learning with Verifiable Rewards (RLVR).
@@ -305,7 +305,7 @@ Write `Website/index.html` with the following structure. This is the largest sin
 
 ```bash
 # Open local file in browser (or use python http server)
-cd /mnt/data/wanzl/cave-agent/Website
+cd /mnt/data/wanzl/pycallingagent/Website
 python3 -m http.server 8080 &
 # Then visit http://localhost:8080
 ```
@@ -325,18 +325,18 @@ git commit -m "feat(website): add Hero, Teaser, and Abstract sections"
 
 **Files:**
 - Modify: `Website/index.html` (insert after abstract section)
-- Modify: `Website/static/css/caveagent.css`
-- Modify: `Website/static/js/caveagent.js`
+- Modify: `Website/static/css/pycallingagent.css`
+- Modify: `Website/static/js/pycallingagent.js`
 
 **Step 1: Add HTML for dual-stream section in index.html**
 
 Insert after the abstract `</section>` closing tag:
 
 ```html
-<!-- ==================== SECTION 3: HOW CAVEAGENT WORKS ==================== -->
+<!-- ==================== SECTION 3: HOW PYCALLINGAGENT WORKS ==================== -->
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 has-text-centered">How CaveAgent Works</h2>
+    <h2 class="title is-3 has-text-centered">How PyCallingAgent Works</h2>
     <p class="subtitle has-text-centered">Click each step or press "Play All" to see the dual-stream architecture in action.</p>
 
     <!-- Step Controls -->
@@ -386,7 +386,7 @@ Insert after the abstract `</section>` closing tag:
 </section>
 ```
 
-**Step 2: Add CSS for dual-stream animation in caveagent.css**
+**Step 2: Add CSS for dual-stream animation in pycallingagent.css**
 
 ```css
 /* ===== Dual-Stream Animation ===== */
@@ -469,7 +469,7 @@ Insert after the abstract `</section>` closing tag:
 }
 ```
 
-**Step 3: Add JavaScript for dual-stream interaction in caveagent.js**
+**Step 3: Add JavaScript for dual-stream interaction in pycallingagent.js**
 
 ```javascript
 /* ===== Dual-Stream Animation ===== */
@@ -483,7 +483,7 @@ const dualStreamSteps = [
   ],
   functions=[Function(reverse)],
 )
-agent = CaveAgent(model, runtime)</code></pre></div>`,
+agent = PyCallingAgent(model, runtime)</code></pre></div>`,
     runtime: `<div class="ds-step"><p><strong>Runtime State S<sub>0</sub></strong></p><div class="ds-var">secret = "!dlrow ,olleH"</div><div class="ds-var">greeting = ""</div><div class="ds-var">reverse(s) -> str</div></div>`,
     status: "Inject",
     activeSide: "runtime"
@@ -567,7 +567,7 @@ Expected: Clicking "Play All" auto-advances every 2.5s. Clicking step buttons ju
 **Step 5: Commit**
 
 ```bash
-git add Website/index.html Website/static/css/caveagent.css Website/static/js/caveagent.js
+git add Website/index.html Website/static/css/pycallingagent.css Website/static/js/pycallingagent.js
 git commit -m "feat(website): add interactive dual-stream animation section"
 ```
 
@@ -577,8 +577,8 @@ git commit -m "feat(website): add interactive dual-stream animation section"
 
 **Files:**
 - Modify: `Website/index.html` (insert after Section 3)
-- Modify: `Website/static/css/caveagent.css` (append)
-- Modify: `Website/static/js/caveagent.js` (append)
+- Modify: `Website/static/css/pycallingagent.css` (append)
+- Modify: `Website/static/js/pycallingagent.js` (append)
 
 **Step 1: Add HTML for smart home walkthrough in index.html**
 
@@ -589,7 +589,7 @@ Insert after Section 3's closing `</section>`:
 <section class="section hero is-light">
   <div class="container is-max-desktop">
     <h2 class="title is-3 has-text-centered">Stateful Runtime in Action: Smart Home</h2>
-    <p class="subtitle has-text-centered">Click each turn to see how CaveAgent maintains persistent state across interactions.</p>
+    <p class="subtitle has-text-centered">Click each turn to see how PyCallingAgent maintains persistent state across interactions.</p>
 
     <!-- Turn Tabs -->
     <div class="tabs is-centered is-boxed is-medium" id="sh-tabs">
@@ -641,7 +641,7 @@ Insert after Section 3's closing `</section>`:
 </section>
 ```
 
-**Step 2: Append CSS for smart home walkthrough to caveagent.css**
+**Step 2: Append CSS for smart home walkthrough to pycallingagent.css**
 
 ```css
 /* ===== Smart Home Walkthrough ===== */
@@ -695,13 +695,13 @@ Insert after Section 3's closing `</section>`:
 }
 ```
 
-**Step 3: Append JavaScript for smart home walkthrough to caveagent.js**
+**Step 3: Append JavaScript for smart home walkthrough to pycallingagent.js**
 
 ```javascript
 /* ===== Smart Home Walkthrough ===== */
 const shTurns = [
   {
-    semantic: '<p style="color:#888;"><em>Runtime initialized with smart home devices.</em></p><pre><code class="language-python">runtime = PythonRuntime(\n  variables=[\n    Variable("thermostat", Thermostat(18)),\n    Variable("door_lock", Lock(locked=True)),\n    Variable("lights", Lights(on=False)),\n    Variable("camera", Camera(recording=False)),\n  ]\n)\nagent = CaveAgent(model, runtime)</code></pre>',
+    semantic: '<p style="color:#888;"><em>Runtime initialized with smart home devices.</em></p><pre><code class="language-python">runtime = PythonRuntime(\n  variables=[\n    Variable("thermostat", Thermostat(18)),\n    Variable("door_lock", Lock(locked=True)),\n    Variable("lights", Lights(on=False)),\n    Variable("camera", Camera(recording=False)),\n  ]\n)\nagent = PyCallingAgent(model, runtime)</code></pre>',
     devices: {
       thermostat: { value: "18\u00b0C", on: false },
       door: { value: "Locked", on: false, icon: "\uD83D\uDD12" },
@@ -787,7 +787,7 @@ Expected: Clicking tabs switches between turns. Device cards animate (pulse + co
 **Step 5: Commit**
 
 ```bash
-git add Website/index.html Website/static/css/caveagent.css Website/static/js/caveagent.js
+git add Website/index.html Website/static/css/pycallingagent.css Website/static/js/pycallingagent.js
 git commit -m "feat(website): add interactive smart home walkthrough section"
 ```
 
@@ -810,7 +810,7 @@ Insert after Section 4's closing `</section>`:
       <h2 class="title is-3 has-text-centered">Applications &amp; Case Studies</h2>
       <div id="results-carousel" class="carousel results-carousel">
         <div class="item">
-          <img src="static/images/downstream_applications.png" alt="Key advantages of CaveAgent" loading="lazy"/>
+          <img src="static/images/downstream_applications.png" alt="Key advantages of PyCallingAgent" loading="lazy"/>
           <h2 class="subtitle has-text-centered">Key Advantages: UI Rendering, Validation, RL Rewards, Multi-Agent Handoff, Benchmarking</h2>
         </div>
         <div class="item">
@@ -852,8 +852,8 @@ git commit -m "feat(website): add image carousel with case studies"
 
 **Files:**
 - Modify: `Website/index.html` (insert after Section 5)
-- Modify: `Website/static/css/caveagent.css` (append)
-- Modify: `Website/static/js/caveagent.js` (append)
+- Modify: `Website/static/css/pycallingagent.css` (append)
+- Modify: `Website/static/js/pycallingagent.js` (append)
 
 **Step 1: Add HTML for tabbed results in index.html**
 
@@ -878,7 +878,7 @@ Insert after Section 5's closing `</section>`:
     <!-- Tab content panels -->
     <div class="results-panel" id="results-panel-0">
       <p class="has-text-centered" style="margin-bottom: 1rem;">
-        Performance on <strong>Tau<sup>2</sup>-bench (Retail domain)</strong> across 6 SOTA LLMs. CaveAgent achieves <strong>+10.5% average success rate improvement</strong>.
+        Performance on <strong>Tau<sup>2</sup>-bench (Retail domain)</strong> across 6 SOTA LLMs. PyCallingAgent achieves <strong>+10.5% average success rate improvement</strong>.
       </p>
       <div class="table-container">
         <table class="table is-striped is-hoverable is-fullwidth">
@@ -886,7 +886,7 @@ Insert after Section 5's closing `</section>`:
             <tr>
               <th>Model</th>
               <th>Baseline SR</th>
-              <th>CaveAgent SR</th>
+              <th>PyCallingAgent SR</th>
               <th>Improvement</th>
             </tr>
           </thead>
@@ -905,7 +905,7 @@ Insert after Section 5's closing `</section>`:
 
     <div class="results-panel" id="results-panel-1" style="display:none;">
       <p class="has-text-centered" style="margin-bottom: 1rem;">
-        CaveAgent achieves <strong>28.4% reduction</strong> in total token consumption and <strong>59% reduction</strong> on data-intensive tasks by delegating state to the persistent runtime.
+        PyCallingAgent achieves <strong>28.4% reduction</strong> in total token consumption and <strong>59% reduction</strong> on data-intensive tasks by delegating state to the persistent runtime.
       </p>
       <div class="has-text-centered">
         <img src="static/images/token_consumption.png" alt="Token consumption comparison" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" loading="lazy">
@@ -914,7 +914,7 @@ Insert after Section 5's closing `</section>`:
 
     <div class="results-panel" id="results-panel-2" style="display:none;">
       <p class="has-text-centered" style="margin-bottom: 1rem;">
-        Type proficiency radar chart across multiple data types showing CaveAgent's consistent advantage.
+        Type proficiency radar chart across multiple data types showing PyCallingAgent's consistent advantage.
       </p>
       <div class="has-text-centered">
         <img src="static/images/type_proficiency_multi_radar.png" alt="Type proficiency radar chart" style="max-width: 100%; border: 1px solid #ddd; border-radius: 4px;" loading="lazy">
@@ -933,7 +933,7 @@ Insert after Section 5's closing `</section>`:
 </section>
 ```
 
-**Step 2: Append CSS for result tabs to caveagent.css**
+**Step 2: Append CSS for result tabs to pycallingagent.css**
 
 ```css
 /* ===== Result Tabs ===== */
@@ -949,7 +949,7 @@ Insert after Section 5's closing `</section>`:
 }
 ```
 
-**Step 3: Append JavaScript for tab switching to caveagent.js**
+**Step 3: Append JavaScript for tab switching to pycallingagent.js**
 
 ```javascript
 /* ===== Results Tabs ===== */
@@ -973,7 +973,7 @@ Expected: Clicking each tab shows the corresponding panel. Table renders with co
 **Step 5: Commit**
 
 ```bash
-git add Website/index.html Website/static/css/caveagent.css Website/static/js/caveagent.js
+git add Website/index.html Website/static/css/pycallingagent.css Website/static/js/pycallingagent.js
 git commit -m "feat(website): add tabbed experimental results section"
 ```
 
@@ -998,14 +998,14 @@ Insert after Section 6's closing `</section>`:
         <div class="box">
           <h4 class="title is-5">Installation</h4>
           <div style="position: relative;">
-            <pre><code class="language-python">pip install 'cave-agent[all]'</code></pre>
+            <pre><code class="language-python">pip install 'pycallingagent[all]'</code></pre>
           </div>
 
           <h4 class="title is-5" style="margin-top: 1.5rem;">Hello World</h4>
           <pre><code class="language-python">import asyncio
-from cave_agent import CaveAgent
-from cave_agent.runtime import PythonRuntime, Variable, Function
-from cave_agent.models import LiteLLMModel
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import PythonRuntime, Variable, Function
+from pycallingagent.models import LiteLLMModel
 
 model = LiteLLMModel(
     model_id="model-id",
@@ -1025,7 +1025,7 @@ async def main():
         ],
         functions=[Function(reverse)],
     )
-    agent = CaveAgent(model, runtime=runtime)
+    agent = PyCallingAgent(model, runtime=runtime)
     response = await agent.run("Reverse the secret")
     print(runtime.retrieve("greeting"))  # Hello, world!
 
@@ -1033,11 +1033,11 @@ asyncio.run(main())</code></pre>
         </div>
 
         <div class="has-text-centered" style="margin-top: 1.5rem;">
-          <a href="https://github.com/acodercat/cave-agent" target="_blank" class="button is-rounded is-dark">
+          <a href="https://github.com/vanzll/PyAgent" target="_blank" class="button is-rounded is-dark">
             <span class="icon"><i class="fab fa-github"></i></span>
             <span>Full Documentation</span>
           </a>
-          <a href="https://pypi.org/project/cave-agent" target="_blank" class="button is-rounded is-outlined">
+          <a href="https://pypi.org/project/pycallingagent" target="_blank" class="button is-rounded is-outlined">
             <span class="icon"><i class="fas fa-cube"></i></span>
             <span>PyPI Package</span>
           </a>
@@ -1057,8 +1057,8 @@ asyncio.run(main())</code></pre>
         <span class="copy-text">Copy</span>
       </button>
     </div>
-    <pre id="bibtex-code"><code>@article{ran2026caveagent,
-  title={CaveAgent: Transforming LLMs into Stateful Runtime Operators},
+    <pre id="bibtex-code"><code>@article{ran2026pycallingagent,
+  title={PyCallingAgent: Transforming LLMs into Stateful Runtime Operators},
   author={Ran, Maohao and Wan, Zhenglin and Lin, Cooper and Zhang, Yanting and others},
   journal={arXiv preprint arXiv:2601.01569},
   year={2026}
@@ -1085,7 +1085,7 @@ asyncio.run(main())</code></pre>
 **Step 2: Verify all sections render end-to-end**
 
 ```bash
-cd /mnt/data/wanzl/cave-agent/Website
+cd /mnt/data/wanzl/pycallingagent/Website
 python3 -m http.server 8080
 # Visit http://localhost:8080
 ```
@@ -1114,13 +1114,13 @@ git commit -m "feat(website): add Get Started, BibTeX, and Footer sections"
 **Step 1: Convert all PDF figures**
 
 ```bash
-cd /mnt/data/wanzl/cave-agent
+cd /mnt/data/wanzl/pycallingagent
 
 # Try pdftoppm first (from poppler-utils)
 for pdf in token_consumption steps_success multi_turn_bar type_proficiency_multi_radar benchmark_combined vars_count_heatmap; do
-  if [ -f "Website/Cave_agent_overleaf_src/figures/CaveAgent/${pdf}.pdf" ]; then
+  if [ -f "Website/overleaf_src/figures/PyCallingAgent/${pdf}.pdf" ]; then
     pdftoppm -png -r 300 -singlefile \
-      "Website/Cave_agent_overleaf_src/figures/CaveAgent/${pdf}.pdf" \
+      "Website/overleaf_src/figures/PyCallingAgent/${pdf}.pdf" \
       "Website/static/images/${pdf}"
     echo "Converted: ${pdf}"
   fi
@@ -1151,9 +1151,9 @@ git commit -m "feat(website): convert PDF figures to PNG for web display"
 
 **Files:**
 - Modify: `Website/index.html` (minor tweaks)
-- Modify: `Website/static/css/caveagent.css` (responsive fixes)
+- Modify: `Website/static/css/pycallingagent.css` (responsive fixes)
 
-**Step 1: Add responsive CSS fixes to caveagent.css**
+**Step 1: Add responsive CSS fixes to pycallingagent.css**
 
 ```css
 /* ===== Responsive ===== */
@@ -1201,7 +1201,7 @@ git commit -m "feat(website): responsive fixes and final polish"
 **Step 1: Start local server and walk through all sections**
 
 ```bash
-cd /mnt/data/wanzl/cave-agent/Website
+cd /mnt/data/wanzl/pycallingagent/Website
 python3 -m http.server 8080
 ```
 
@@ -1222,5 +1222,5 @@ Checklist:
 
 ```bash
 git add Website/
-git commit -m "feat(website): complete CaveAgent paper website"
+git commit -m "feat(website): complete PyCallingAgent paper website"
 ```

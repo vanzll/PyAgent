@@ -1,6 +1,6 @@
-from cave_agent import CaveAgent, LogLevel, Logger
-from cave_agent.models import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Variable, Type
+from pycallingagent import PyCallingAgent, LogLevel, Logger
+from pycallingagent.models import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Variable, Type
 import os
 import asyncio
 from rich.syntax import Syntax
@@ -50,7 +50,7 @@ async def main():
     )
     
     # Create agent
-    agent = CaveAgent(
+    agent = PyCallingAgent(
         model,
         runtime=runtime,
         log_level=LogLevel.ERROR

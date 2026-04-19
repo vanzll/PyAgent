@@ -2,10 +2,10 @@ import pytest
 import tempfile
 from pathlib import Path
 
-from cave_agent.skills import Skill, SkillRegistry, SkillDiscovery
-from cave_agent import CaveAgent
-from cave_agent.runtime import IPythonRuntime, IPyKernelRuntime, Function, Variable, Type
-from cave_agent.models import Model
+from pycallingagent.skills import Skill, SkillRegistry, SkillDiscovery
+from pycallingagent import PyCallingAgent
+from pycallingagent.runtime import IPythonRuntime, IPyKernelRuntime, Function, Variable, Type
+from pycallingagent.models import Model
 
 
 # =============================================================================
@@ -150,7 +150,7 @@ class TestSkillDiscoveryFromFile:
             "---\nname: test\ndescription: Test\n---\nContent"
         )
         (temp_dir / "injection.py").write_text("""
-from cave_agent.runtime import Function, Variable, Type
+from pycallingagent.runtime import Function, Variable, Type
 
 def helper(x):
     return x * 2
@@ -404,13 +404,13 @@ class TestBuildSkillStore:
 
 
 # =============================================================================
-# CaveAgent Skills Integration Tests
+# PyCallingAgent Skills Integration Tests
 # =============================================================================
 
 class TestAgentSkillsInit:
     def test_agent_with_skills_list(self, mock_model):
         skill = Skill(name="test-skill", description="Test")
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
         assert agent._skill_registry.get_skill("test-skill") is not None
 
     def test_agent_with_skills_from_discovery(self, temp_dir, mock_model):
@@ -418,25 +418,25 @@ class TestAgentSkillsInit:
             "---\nname: test\ndescription: Test skill\n---\nContent"
         )
         skills = SkillDiscovery.from_directory(temp_dir)
-        agent = CaveAgent(model=mock_model, skills=skills)
+        agent = PyCallingAgent(model=mock_model, skills=skills)
         assert agent._skill_registry.get_skill("test") is not None
 
     def test_agent_no_skills(self, mock_model):
-        agent = CaveAgent(model=mock_model)
+        agent = PyCallingAgent(model=mock_model)
         assert agent._skill_registry.list_skills() == []
 
 
 class TestAgentSkillsSystemPrompt:
     def test_skills_in_system_prompt(self, mock_model):
         skill = Skill(name="my-skill", description="My description")
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
         prompt = agent.build_system_prompt()
 
         assert "my-skill" in prompt
         assert "My description" in prompt
 
     def test_no_skills_in_system_prompt(self, mock_model):
-        agent = CaveAgent(model=mock_model)
+        agent = PyCallingAgent(model=mock_model)
         prompt = agent.build_system_prompt()
         assert "No skills available" in prompt
 
@@ -445,11 +445,11 @@ class TestAgentSkillsRuntime:
     def test_activate_skill_function_injected(self, mock_model):
         """activate_skill function is injected into runtime."""
         skill = Skill(name="test", description="Test")
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
         assert "activate_skill" in agent.runtime.describe_functions()
 
     def test_activate_skill_not_injected_without_skills(self, mock_model):
-        agent = CaveAgent(model=mock_model)
+        agent = PyCallingAgent(model=mock_model)
         assert "activate_skill" not in agent.runtime.describe_functions()
 
     @pytest.mark.asyncio
@@ -460,7 +460,7 @@ class TestAgentSkillsRuntime:
             description="Test",
             body_content="Skill instructions here",
         )
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
 
         result = await agent.runtime.execute('output = activate_skill("my-skill")')
         assert result.success
@@ -481,7 +481,7 @@ class TestAgentSkillsRuntime:
             functions=[Function(helper)],
             variables=[Variable("data", value=[1, 2, 3])],
         )
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
 
         await agent.runtime.execute('activate_skill("my-skill")')
 
@@ -495,7 +495,7 @@ class TestAgentSkillsRuntime:
     async def test_activate_skill_not_found(self, mock_model):
         """activate_skill raises KeyError for unknown skill."""
         skill = Skill(name="test", description="Test")
-        agent = CaveAgent(model=mock_model, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, skills=[skill])
 
         result = await agent.runtime.execute('activate_skill("nonexistent")')
         assert not result.success
@@ -507,12 +507,12 @@ class TestAgentSkillsRuntime:
 # =============================================================================
 
 class TestAgentSkillsIPyKernel:
-    """Test CaveAgent skills with IPyKernelRuntime."""
+    """Test PyCallingAgent skills with IPyKernelRuntime."""
 
     def test_activate_skill_function_injected(self, mock_model):
         skill = Skill(name="test", description="Test")
         runtime = IPyKernelRuntime()
-        agent = CaveAgent(model=mock_model, runtime=runtime, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, runtime=runtime, skills=[skill])
         assert "activate_skill" in agent.runtime.describe_functions()
 
     @pytest.mark.asyncio
@@ -524,7 +524,7 @@ class TestAgentSkillsIPyKernel:
             body_content="Skill instructions here",
         )
         runtime = IPyKernelRuntime()
-        agent = CaveAgent(model=mock_model, runtime=runtime, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, runtime=runtime, skills=[skill])
 
         await runtime.start()
         try:
@@ -550,7 +550,7 @@ class TestAgentSkillsIPyKernel:
             variables=[Variable("data", value=[1, 2, 3])],
         )
         runtime = IPyKernelRuntime()
-        agent = CaveAgent(model=mock_model, runtime=runtime, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, runtime=runtime, skills=[skill])
 
         await runtime.start()
         try:
@@ -571,7 +571,7 @@ class TestAgentSkillsIPyKernel:
         """activate_skill raises KeyError for unknown skill in kernel."""
         skill = Skill(name="real-skill", description="Test")
         runtime = IPyKernelRuntime()
-        agent = CaveAgent(model=mock_model, runtime=runtime, skills=[skill])
+        agent = PyCallingAgent(model=mock_model, runtime=runtime, skills=[skill])
 
         await runtime.start()
         try:

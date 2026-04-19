@@ -9,7 +9,7 @@ You are taking over the final delivery of our CS5260 project.
 Project:
 
 - Financial Research Agent
-- Public-facing web app built on top of CaveAgent
+- Public-facing web app built on top of PyCallingAgent
 - GitHub repo: `https://github.com/vanzll/PyAgent`
 
 Your responsibilities:
@@ -38,7 +38,7 @@ Deployment mode:
 
 Do not:
 
-- work from the dirty old `cave-agent` directory
+- work from the dirty old `pycallingagent` directory
 - switch to live data mode right before submission
 - remove the CS5260 attribution statement
 - rely on temporary tunnels for the final public URL

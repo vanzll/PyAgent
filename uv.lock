@@ -241,7 +241,7 @@ wheels = [
 ]
 
 [[package]]
-name = "cave-agent"
+name = "pycallingagent"
 version = "0.7.3"
 source = { editable = "." }
 dependencies = [

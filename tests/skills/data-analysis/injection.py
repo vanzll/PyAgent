@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import List, Dict, Any
 import statistics
 
-from cave_agent.runtime import Function, Variable, Type
+from pycallingagent.runtime import Function, Variable, Type
 
 
 # =============================================================================

@@ -21,7 +21,7 @@ Use these as the source of truth:
 - GitHub repo: `https://github.com/vanzll/PyAgent`
 - Clean local working copy on this machine: `/mnt/data/wanzl/PyAgent-release`
 
-Do **not** continue product delivery work from `/mnt/data/wanzl/cave-agent`.
+Do **not** continue product delivery work from `/mnt/data/wanzl/pycallingagent`.
 That directory is a historical development workspace with unrelated changes and an unresolved merge conflict.
 
 ## 3. Current Product Status
@@ -51,13 +51,13 @@ Still required to complete course delivery:
 
 ### Product
 
-- `src/cave_agent/webapp/app.py`
-- `src/cave_agent/webapp/agent_runner.py`
-- `src/cave_agent/webapp/financial_data.py`
-- `src/cave_agent/webapp/service.py`
-- `src/cave_agent/webapp/templates/index.html`
-- `src/cave_agent/webapp/static/app.css`
-- `src/cave_agent/webapp/static/app.js`
+- `src/pycallingagent/webapp/app.py`
+- `src/pycallingagent/webapp/agent_runner.py`
+- `src/pycallingagent/webapp/financial_data.py`
+- `src/pycallingagent/webapp/service.py`
+- `src/pycallingagent/webapp/templates/index.html`
+- `src/pycallingagent/webapp/static/app.css`
+- `src/pycallingagent/webapp/static/app.js`
 
 ### Deployment
 
@@ -99,7 +99,7 @@ http://localhost:8000
 ```bash
 export WEBAPP_DEMO_MODE=1
 export PYTHONPATH=src
-python3.10 -m cave_agent.webapp
+python3.10 -m pycallingagent.webapp
 ```
 
 ## 6. How To Deploy
@@ -196,7 +196,7 @@ Recommended delegation scope:
 
 ## 11. What Not To Do
 
-- Do not continue from the dirty `cave-agent` workspace
+- Do not continue from the dirty `pycallingagent` workspace
 - Do not switch to live data mode right before grading
 - Do not remove the homepage disclaimer
 - Do not promise investment advice or trading recommendations
@@ -209,7 +209,7 @@ If deployment fails:
 1. check the Render build logs
 2. check that `render.yaml` is detected
 3. confirm `WEBAPP_DEMO_MODE=1`
-4. confirm the start command is `cave-agent-webapp`
+4. confirm the start command is `pycallingagent-webapp`
 5. re-deploy and test again
 
 If a live public demo becomes unstable, fall back to:

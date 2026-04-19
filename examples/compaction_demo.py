@@ -11,9 +11,9 @@ Usage:
 import asyncio
 import os
 
-from cave_agent import CaveAgent
-from cave_agent.models import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Function, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.models import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Function, Variable
 
 model = OpenAIServerModel(
     model_id=os.getenv("LLM_MODEL_ID"),
@@ -47,7 +47,7 @@ async def main():
     )
 
     # Small context_window → compaction triggers after a few rounds
-    agent = CaveAgent(
+    agent = PyCallingAgent(
         model,
         runtime=runtime,
         context_window=3_000,

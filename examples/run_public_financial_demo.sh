@@ -49,7 +49,7 @@ unset LLM_API_KEY
 unset LLM_BASE_URL
 
 cd "$ROOT_DIR"
-PYTHONPATH=src python3.10 -m cave_agent.webapp >"$APP_LOG" 2>&1 &
+PYTHONPATH=src python3.10 -m pycallingagent.webapp >"$APP_LOG" 2>&1 &
 APP_PID=$!
 
 for _ in {1..40}; do

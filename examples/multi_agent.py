@@ -3,7 +3,7 @@
 Demonstrates orchestrator + sub-agent coordination with Rich display.
 
 Usage:
-    cd cave-agent && uv run python examples/multi_agent.py
+    cd pycallingagent && uv run python examples/multi_agent.py
 """
 
 import asyncio
@@ -14,9 +14,9 @@ from rich.table import Table
 from rich.text import Text
 from rich.rule import Rule
 
-from cave_agent import CaveAgent
-from cave_agent.models.openai import OpenAIServerModel
-from cave_agent.runtime import IPythonRuntime, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.models.openai import OpenAIServerModel
+from pycallingagent.runtime import IPythonRuntime, Variable
 
 console = Console()
 
@@ -42,7 +42,7 @@ async def main():
 
     # -- Sub-Agents --------------------------------------------------------
 
-    cleaner = CaveAgent(
+    cleaner = PyCallingAgent(
         model,
         runtime=IPythonRuntime(
             variables=[
@@ -53,7 +53,7 @@ async def main():
         display=False,
     )
 
-    analyzer = CaveAgent(
+    analyzer = PyCallingAgent(
         model,
         runtime=IPythonRuntime(
             variables=[
@@ -66,7 +66,7 @@ async def main():
 
     # -- Orchestrator ------------------------------------------------------
 
-    orchestrator = CaveAgent(
+    orchestrator = PyCallingAgent(
         model,
         runtime=IPythonRuntime(
             variables=[
@@ -94,7 +94,7 @@ async def main():
     from rich.syntax import Syntax
 
     code = '''\
-orchestrator = CaveAgent(
+orchestrator = PyCallingAgent(
   model,
   runtime=IPythonRuntime(variables=[
     Variable("raw_data",  raw_data),

@@ -1,1 +1,1 @@
-web: cave-agent-webapp
+web: pycallingagent-webapp

@@ -9,9 +9,9 @@ import pytest
 import pytest_asyncio
 from pathlib import Path
 
-from cave_agent import CaveAgent
-from cave_agent.skills import SkillDiscovery
-from cave_agent.runtime import IPythonRuntime, IPyKernelRuntime, Variable
+from pycallingagent import PyCallingAgent
+from pycallingagent.skills import SkillDiscovery
+from pycallingagent.runtime import IPythonRuntime, IPyKernelRuntime, Variable
 
 
 # =============================================================================
@@ -46,7 +46,7 @@ def agent_with_skills(model, skills_dir):
     )
 
     skills = SkillDiscovery.from_directory(skills_dir)
-    return CaveAgent(
+    return PyCallingAgent(
         model=model,
         skills=skills,
         runtime=runtime,
@@ -222,7 +222,7 @@ class TestErrorHandling:
 
 @pytest_asyncio.fixture
 async def kernel_agent_with_skills(model, skills_dir):
-    """CaveAgent with skills using IPyKernelRuntime."""
+    """PyCallingAgent with skills using IPyKernelRuntime."""
     runtime = IPyKernelRuntime(
         variables=[
             Variable("instructions", description="Store skill instructions here"),
@@ -235,7 +235,7 @@ async def kernel_agent_with_skills(model, skills_dir):
     await runtime.start()
 
     skills = SkillDiscovery.from_directory(skills_dir)
-    agent = CaveAgent(model=model, skills=skills, runtime=runtime, max_steps=10)
+    agent = PyCallingAgent(model=model, skills=skills, runtime=runtime, max_steps=10)
     yield agent
     await runtime.stop()
 
